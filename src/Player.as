@@ -10,6 +10,7 @@ package
   {
     private var Sprites:Class;
     private var jump:Number;
+    private var facingDir:String;
 
     public function Player( mySprites:Class )
     {
@@ -22,7 +23,11 @@ package
       maxVelocity.y = Globals.GAME_GRAVITY;
       acceleration.y = Globals.GAME_GRAVITY;
 
-      addAnimation( 'idle', [2] );
+      addAnimation( 'idle', [4] );
+      addAnimation( 'idle_right', [4] );
+      addAnimation( 'idle_left', [5] );
+      addAnimation( 'run_left', [5] );
+      addAnimation( 'run_right', [4] );
       jump = 0;
     }
 
@@ -33,9 +38,13 @@ package
 
       if ( FlxG.keys.LEFT ) {
         velocity.x = -Globals.PLAYER_SPEED;
+        facingDir = 'left';
+        play( 'run_left' );
       }
       if ( FlxG.keys.RIGHT ) {
         velocity.x = Globals.PLAYER_SPEED;
+        facingDir = 'right';
+        play( 'run_right' );
       }
 
       // mario style jump mechanic
@@ -53,6 +62,11 @@ package
 
       if ( isTouching( FlxObject.FLOOR ) ) {
         jump = 0;
+      }
+
+      if ( velocity.x == 0 ) {
+        if ( facingDir == 'left' ) play( 'idle_left' );
+        else if ( facingDir == 'right' ) play( 'idle_right' );
       }
 
       super.update( );
