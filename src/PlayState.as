@@ -11,7 +11,7 @@ package
 
     override public function create():void
     {
-      var game:Game = new Game( 0, Tiles );
+      var game:Game = new Game( 1, Tiles );
       FlxG.switchState( game );
     }
   }
