@@ -95,7 +95,7 @@ package
     public function getLevel( number:int ):String {
 
       switch( number ) {
-        case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 9 );
+        case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 10 );
         case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 );
         case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 25 );
         case 3: return FlxTilemap.arrayToCSV( Levels.generateLevel( 30, 30 ), 30 );
@@ -183,7 +183,7 @@ package
 
       // correct animations
       // when there is lava to the left, right and bottom of a lava, make it whole lava
-      for ( i = level.widthInTiles*level.heightInTiles-level.widthInTiles; i > 0; i-- ) {
+      for ( i = level.widthInTiles*level.heightInTiles-level.widthInTiles; i > level.widthInTiles; i-- ) {
 
         // set bottom indicator
         thisTileLevel = this.level.getTileByIndex( i ); thisTileLava = this.lava.getTileByIndex( i );
@@ -191,16 +191,19 @@ package
         bottom = i + level.widthInTiles; bottomTileLava = this.lava.getTileByIndex( bottom ); bottomTileLevel = this.level.getTileByIndex( bottom );
         left = ( i % level.widthInTiles == 0 )? -1 : i - 1; leftTileLava = this.lava.getTileByIndex( left ); leftTileLevel = this.level.getTileByIndex( left );
         right = ( (i + 1) % level.widthInTiles == 0 )? -1: i + 1; rightTileLava = this.lava.getTileByIndex( right ); rightTileLevel = this.level.getTileByIndex( right );
-
+trace( top + ' ' + bottom + ' ' + left + ' ' + right + ' ' );
         // make lava falling again
         if ( this.isLava( thisTileLava ) && !this.isFloor( bottomTileLevel ) ) {
           this.lava.setTileByIndex( top, 12 );
         }
-        if ( this.isLava( thisTileLava ) && ( this.isLava( leftTileLava ) || this.isFloor( leftTileLevel ) ) && ( this.isLava( rightTileLava ) || this.isFloor( rightTileLevel ) ) && ( this.isLava( bottomTileLava ) || this.isFloor( bottomTileLevel ) ) ) {
+		// harden lava if surrounded by lava or floor
+        if ( this.isLava( thisTileLava ) && this.isLava( leftTileLava )	&& this.isLava( rightTileLava )	&& this.isLava( bottomTileLava ) ) {
 
           this.lava.setTileByIndex( i, 24 );
+		  
           if ( this.isLava( topTileLava ) && thisTileLevel == 0 ) {
             this.level.setTileByIndex( i, Globals.TILES_WALL );
+			this.lava.setTileByIndex( i, 0 );
           }
         }
       }
