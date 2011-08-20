@@ -17,9 +17,9 @@ package
 
     // game constants
     public static const GAME_GRAVITY:int = 200;
-    public static const GAME_LAVA_SPREAD_POSSIBILITY:int = 0; // 5 percent chance of lava spreading to both sides
-    public static const GAME_LAVA_SPEED:int = 0; // in seconds how often lava update routine has to be called
-    public static const GAME_LAVA_NEW:int = 0; // in seconds when a new lava shall appear
+    public static const GAME_LAVA_SPREAD_POSSIBILITY:int = 10; // x percent chance of lava spreading to both sides
+    public static const GAME_LAVA_SPEED:int = 10; // in seconds how often lava update routine has to be called
+    public static const GAME_LAVA_NEW:int = 2; // in seconds when a new lava shall appear
     public static const PLAYER_SPEED:int = 150;
     public static const PLAYER_JUMP:int = 800;
     public static const PLAYER_JUMP_MAX:Number = 0.25;
