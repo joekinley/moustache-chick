@@ -86,6 +86,9 @@ package
 
       // collide player with level
       FlxG.collide( this.level, this.player );
+      // collide player with lava
+      FlxG.collide( this.lava, this.player, this.lavaCollision );
+
 
       // check for win condition
       if ( this.level.getTile( this.player.x/Globals.TILE_WIDTH, this.player.y/Globals.TILE_HEIGHT ) == Globals.TILES_EXIT ) {
@@ -177,7 +180,7 @@ package
       // create new lava
       if ( this.lavaTimer > Globals.GAME_LAVA_NEW ) {
         for ( i = 0; i < level.widthInTiles * level.heightInTiles; i++ ) {
-          if ( this.level.getTileByIndex( i ) == Globals.TILES_LAVA_SOURCE ) {
+          if ( Math.random( ) * 100 < Globals.GAME_LAVA_SPREAD_POSSIBILITY && this.level.getTileByIndex( i ) == Globals.TILES_LAVA_SOURCE ) {
             this.lava.setTileByIndex( i + level.widthInTiles, 12 );
           }
         }
@@ -283,6 +286,13 @@ package
       if ( mode == 1 && ( tile == 21 ) ) return true;
       if ( mode == 2 && ( tile == 22 ) ) return true;
       return false;
+    }
+
+    public function lavaCollision( object1:Object, object2:Object ):void {
+
+      //trace( 'player hits LAVA' );
+      //trace( object1, object2 );
+      this.player.flicker( 3 );
     }
 
     // used for debug stuff
