@@ -10,7 +10,10 @@ package
   {
     private var Sprites:Class;
     private var jump:Number;
-    private var facingDir:String;
+    private var whip:Boolean;
+    public var facingDir:String;
+
+    public var whipSprite:FlxSprite;
 
     public function Player( mySprites:Class )
     {
@@ -23,6 +26,7 @@ package
       maxVelocity.x = Globals.PLAYER_SPEED;
       maxVelocity.y = Globals.GAME_GRAVITY;
       acceleration.y = Globals.GAME_GRAVITY;
+      centerOffsets( );
 
       addAnimation( 'idle', [4] );
       addAnimation( 'idle_right', [4] );
@@ -34,22 +38,33 @@ package
       addAnimation( 'jump_center', [8] );
       jump = 0;
       play( 'idle' );
+
+      // create whip sprite
+      whipSprite = new FlxSprite( );
+      whipSprite.loadGraphic( Sprites, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
+      whipSprite.addAnimation( 'left', [38] );
+      whipSprite.addAnimation( 'right', [37] );
+      whipSprite.addAnimation( 'up', [36] );
+      whipSprite.kill( );
     }
 
     override public function update( ):void {
 
       velocity.x = 0;
-      facingDir = 'center';
+      //facingDir = 'center';
+      whipSprite.play( 'up' );
 
       if ( FlxG.keys.LEFT ) {
         velocity.x = -Globals.PLAYER_SPEED;
         facingDir = 'left';
         play( 'run_left' );
+        whipSprite.play( 'left' );
       }
       if ( FlxG.keys.RIGHT ) {
         velocity.x = Globals.PLAYER_SPEED;
         facingDir = 'right';
         play( 'run_right' );
+        whipSprite.play( 'right' );
       }
 
       // play jump sound
@@ -82,7 +97,27 @@ package
         else play( 'idle' );
       }
 
+      // also show whip sprite
+      if ( this.whip ) {
+        if( velocity.x < 0 ) {
+          whipSprite.x = this.x - this.width;
+          whipSprite.y = this.y;
+        } else if ( velocity.x > 0 ) {
+          whipSprite.x = this.x + this.width;
+          whipSprite.y = this.y;
+        } else {
+          whipSprite.x = this.x;
+          whipSprite.y = this.y - this.height;
+        }
+      }
+
       super.update( );
+    }
+
+    public function setWhipping( status:Boolean = false ):void {
+      this.whip = status;
+      if ( status ) this.whipSprite.revive( );
+      else this.whipSprite.kill( );
     }
   }
 

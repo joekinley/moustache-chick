@@ -13,6 +13,7 @@ package
   import org.flixel.FlxG;
   import org.flixel.FlxRect;
   import org.flixel.FlxText;
+  import org.flixel.FlxSprite;
   import org.flixel.system.FlxTile;
 
   public class Game extends FlxState
@@ -23,6 +24,7 @@ package
     private var layerWorld:FlxGroup;
     private var lava:FlxTilemap;
     private var layerObjects:FlxGroup;
+    private var layerBackground:FlxGroup;
 
     private var game:Game;
     private var player:Player;
@@ -37,6 +39,8 @@ package
 
     private var score:FlxText;
     private var health:FlxText;
+    private var isWhipping:Boolean
+    private var whipTimer:Number;
 
     public function Game( number:int, tileset:Class )
     {
@@ -50,11 +54,21 @@ package
       // initialize layers
       layerWorld = new FlxGroup;
       layerObjects = new FlxGroup;
+      layerBackground = new FlxGroup;
+
+      // initialize background group; tile it 5x10
+      for ( var i:int = 0; i < 5; i++ ) {
+        for ( var j:int = 0; j < 10; j++ ) {
+          var oneTile:FlxSprite = new FlxSprite( j * 160, i * 160, Globals.Background );
+          this.layerBackground.add( oneTile );
+        }
+      }
 
       // generate level
       level = new FlxTilemap;
       level.loadMap( this.getLevel( this.gameLevel ), this.Tiles, Globals.TILE_WIDTH, Globals.TILE_HEIGHT, 0, 1, 1, 21 );
       layerWorld.add( level );
+      this.level.setTileProperties( 21, FlxObject.ANY, this.checkWhip ); // for whip action
 
       // initialize lava system
       this.lavaTimer = 0;
@@ -74,9 +88,11 @@ package
       // initialize collectibles
       this.initializeCollectibles( );
 
+      this.add( layerBackground );
       this.add( layerWorld );
       this.add( layerObjects );
       this.add( player );
+      this.add( player.whipSprite );
 
       // set camera
       FlxG.camera.follow( player );
@@ -89,7 +105,7 @@ package
       score.scrollFactor.y = 0;
       add( score );
 
-      health = new FlxText( FlxG.camera.width - 60, 10, 50, 'Health: ' + Globals.health );
+      health = new FlxText( FlxG.camera.width - 60, 10, 100, 'Health: ' + Globals.health );
       health.scrollFactor.x = 0;
       health.scrollFactor.y = 0;
       add( health );
@@ -103,6 +119,7 @@ package
       this.lavaNewTimer += FlxG.elapsed;
       this.lavaAnimationTimer += FlxG.elapsed;
       this.collectibleAnimationTimer += FlxG.elapsed;
+      this.whipTimer += FlxG.elapsed;
 
       if( this.lavaNewTimer > Globals.GAME_LAVA_SPEED ) {
         this.updateLava( );
@@ -119,11 +136,22 @@ package
       // collide player with lava
       FlxG.collide( this.lava, this.player, this.lavaCollision );
 
-
       // check for win condition
       if ( this.level.getTile( this.player.x/Globals.TILE_WIDTH, this.player.y/Globals.TILE_HEIGHT ) == Globals.TILES_EXIT ) {
         var newLevel:Game = new Game( this.gameLevel + 1, Tiles );
         FlxG.switchState( newLevel );
+      }
+
+      // player whipping
+      if ( Globals.hasWhip && FlxG.keys.justPressed( 'A' ) ) {
+        FlxG.play( Globals.SoundCrush, 0.5 )
+        this.isWhipping = true;
+        this.whipTimer = 0;
+        this.player.setWhipping( true );
+      }
+      if ( FlxG.keys.justReleased( 'A' ) || this.whipTimer > Globals.PLAYER_WHIP_DURATION ) {
+        this.isWhipping = false;
+        this.player.setWhipping( false );
       }
 
       // HUD
@@ -131,7 +159,7 @@ package
       this.health.text = 'Health: ' + Globals.health;
 
       // loose condition
-      if ( Globals.health <= 0 ) {
+      if ( Globals.health <= 0 || !this.player.onScreen( ) ) {
         FlxG.switchState( new MenuState );
       }
 
@@ -142,14 +170,20 @@ package
     public function getLevel( number:int ):String {
 
       switch( number ) {
-        case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 10 );
-        case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 );
-        case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 25 );
-        case 3: return FlxTilemap.arrayToCSV( Levels.level3( ), 25 );
-        case 4: return FlxTilemap.arrayToCSV( Levels.level4( ), 6 );
-        case 5: return FlxTilemap.arrayToCSV( Levels.level5( ), 50 );
+        case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 10 ); break;
+        case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 ); break;
+        case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 25 ); break;
+        case 3: return FlxTilemap.arrayToCSV( Levels.level3( ), 25 ); break;
+        case 4: return FlxTilemap.arrayToCSV( Levels.level4( ), 6 ); break;
+        case 5: return FlxTilemap.arrayToCSV( Levels.level5( ), 50 ); break;
+        case 6: return FlxTilemap.arrayToCSV( Levels.level6( ), 30 ); break;
+        case 7: return FlxTilemap.arrayToCSV( Levels.level7( ), 50 ); break;
+        case 8: return FlxTilemap.arrayToCSV( Levels.level8( ), 27 ); break;
 
-        default: return FlxTilemap.arrayToCSV( Levels.generateLevel( 30, 30 ), 30 );
+        default:
+          Globals.hasWhip = true;
+          return FlxTilemap.arrayToCSV( Levels.generateLevel( 30, 30 ), 30 );
+          break;
       }
 
       return "";
@@ -396,11 +430,23 @@ package
       Globals.health++;
     }
 
+    public function checkWhip( tile:FlxTile, obj:FlxObject ):void {
+
+      if ( this.isWhipping ) {
+        if ( this.isFloor( tile.index ) ) {
+          if ( ( this.player.isTouching( FlxObject.CEILING ) )
+          || ( this.player.isTouching( FlxObject.LEFT ) && this.player.facingDir == 'left' )
+          || ( this.player.isTouching( FlxObject.RIGHT ) && this.player.facingDir == 'right' ) ) {
+            this.level.setTileByIndex( tile.mapIndex, 0 );
+          }
+        }
+      }
+    }
+
     // used for debug stuff
     public function debug( ):void {
 
-      if ( FlxG.keys.justPressed( 'P' ) ) this.lavaTimer = 1000;
-      if ( FlxG.keys.justPressed( 'O' ) ) this.lavaNewTimer = 1000;
+      if ( FlxG.keys.justPressed( 'P' ) ) Globals.health++;
     }
   }
 }
