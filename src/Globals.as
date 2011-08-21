@@ -22,7 +22,8 @@ package
     public static const GAME_LAVA_SPEED:Number = 0.10; // in seconds how often lava update routine has to be called (0.20)
     public static const GAME_LAVA_NEW:Number = 0.5; // in seconds when a new lava shall appear (2)
     public static const GAME_LAVA_ANIMATION_SPEED:Number = 0.25; // animation speed for lava
-    public static const PLAYER_SPEED:int = 150;
+    public static const GAME_COLLECTIBLE_ANIMATION_SPEED:Number = 0.5; // animation speed of collectibles
+    public static const PLAYER_SPEED:int = 120;
     public static const PLAYER_JUMP:int = 800;
     public static const PLAYER_JUMP_MAX:Number = 0.25;
     public static const PLAYER_JUMP_MIN:Number = 0.0625;
@@ -33,11 +34,16 @@ package
     public static const TILES_EXIT:int = 11;
     public static const TILES_WALL:int = 22;
     public static const TILES_LAVA_SOURCE:int = 23;
+    public static const TILES_COLLECTIBLE_INDICATOR:int = 10;
 
     // helper functions
     public static function randomNumber( max:int, min:int = 0 ):int {
       return Math.random( ) * ( max - min ) + min;
     }
+
+    [Embed(source = '../assets/sound/jump.mp3')] public static const SoundJump:Class;
+    [Embed(source = '../assets/sound/hurt.mp3')] public static const SoundHurt:Class;
+
   }
 
 }

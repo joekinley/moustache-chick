@@ -8,6 +8,7 @@ package
   import org.flixel.FlxState;
   import org.flixel.FlxGroup;
   import org.flixel.FlxPoint;
+  import org.flixel.FlxParticle;
   import org.flixel.FlxG;
   import org.flixel.FlxRect;
 
@@ -28,6 +29,8 @@ package
     private var lavaTimer:Number;
     private var lavaNewTimer:Number;
     private var lavaAnimationTimer:Number;
+
+    private var collectibleAnimationTimer:Number;
 
     public function Game( number:int, tileset:Class )
     {
@@ -61,6 +64,9 @@ package
       // initialize lava
       this.initializeLava( );
 
+      // initialize collectibles
+      this.initializeCollectibles( );
+
       this.add( layerWorld );
       this.add( layerObjects );
       this.add( player );
@@ -78,10 +84,16 @@ package
       this.lavaTimer += FlxG.elapsed;
       this.lavaNewTimer += FlxG.elapsed;
       this.lavaAnimationTimer += FlxG.elapsed;
+      this.collectibleAnimationTimer += FlxG.elapsed;
 
       if( this.lavaNewTimer > Globals.GAME_LAVA_SPEED ) {
         this.updateLava( );
         this.lavaNewTimer = 0;
+      }
+
+      if ( this.collectibleAnimationTimer > Globals.GAME_COLLECTIBLE_ANIMATION_SPEED ) {
+        this.updateCollectibles( );
+        this.collectibleAnimationTimer = 0;
       }
 
       // collide player with level
@@ -106,7 +118,11 @@ package
         case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 10 );
         case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 );
         case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 25 );
-        case 3: return FlxTilemap.arrayToCSV( Levels.generateLevel( 30, 30 ), 30 );
+        case 3: return FlxTilemap.arrayToCSV( Levels.level3( ), 25 );
+        case 4: return FlxTilemap.arrayToCSV( Levels.level4( ), 5 );
+        case 5: return FlxTilemap.arrayToCSV( Levels.level5( ), 50 );
+
+        default: return FlxTilemap.arrayToCSV( Levels.generateLevel( 30, 30 ), 30 );
       }
 
       return "";
@@ -121,6 +137,15 @@ package
       this.lava = new FlxTilemap;
       this.lava.loadMap( FlxTilemap.arrayToCSV( lavaData, level.widthInTiles ), this.Tiles, Globals.TILE_WIDTH, Globals.TILE_HEIGHT, 0, 1, 1, 1 );
       this.layerObjects.add( this.lava );
+    }
+
+    public function initializeCollectibles( ):void {
+
+      for ( var i:int = 0; i < level.widthInTiles * level.heightInTiles; i++ ) {
+        if ( this.level.getTileByIndex( i ) == Globals.TILES_COLLECTIBLE_INDICATOR ) {
+          this.lava.setTileByIndex( i, Globals.randomNumber( 21, 19 ) );
+        }
+      }
     }
 
     // updates advancing lava doom
@@ -261,6 +286,20 @@ package
       if ( raiseLevel ) this.lavaLevel--;
     }
 
+    public function updateCollectibles( ):void {
+
+      var currentTile:int;
+      for ( var i:int = 0; i < this.lava.widthInTiles * this.lava.heightInTiles; i++ ) {
+        currentTile = this.lava.getTileByIndex( i );
+trace( 'CURRENT TILE ' + currentTile );
+        if ( currentTile == 19 ) {
+          this.lava.setTileByIndex( i, 20 );
+        } else if ( currentTile == 20 ) {
+          this.lava.setTileByIndex( i, 19 );
+        }
+      }
+    }
+
     // helper functions
     // mode = 0 -> all lava
     // mode = 1 -> only falling lava
@@ -290,9 +329,10 @@ package
 
     public function lavaCollision( object1:Object, object2:Object ):void {
 
-      //trace( 'player hits LAVA' );
-      //trace( object1, object2 );
-      this.player.flicker( 3 );
+      if( !this.player.flickering ) {
+        FlxG.play( Globals.SoundHurt, 0.5 )
+        this.player.flicker( 3 );
+      }
     }
 
     // used for debug stuff

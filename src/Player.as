@@ -52,6 +52,9 @@ package
         play( 'run_right' );
       }
 
+      // play jump sound
+      if( FlxG.keys.justPressed( 'UP' ) ) FlxG.play( Globals.SoundJump, 0.5 );
+
       // mario style jump mechanic
       if ( FlxG.keys.UP && jump >= 0 ) {
         jump += FlxG.elapsed;
