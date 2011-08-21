@@ -27,6 +27,7 @@ package
     public static const PLAYER_JUMP:int = 800;
     public static const PLAYER_JUMP_MAX:Number = 0.25;
     public static const PLAYER_JUMP_MIN:Number = 0.0625;
+    public static const PLAYER_MAX_HEALTH:int = 15;
 
     // special tiles
     public static const TILES_EMPTY:int = 1;
@@ -35,14 +36,19 @@ package
     public static const TILES_WALL:int = 22;
     public static const TILES_LAVA_SOURCE:int = 23;
     public static const TILES_COLLECTIBLE_INDICATOR:int = 10;
+    public static const TILES_HEART_INDICATOR:int = 36;
 
     // helper functions
     public static function randomNumber( max:int, min:int = 0 ):int {
       return Math.random( ) * ( max - min ) + min;
     }
 
+    public static var score:int = 0;
+    public static var health:int = 0;
+
     [Embed(source = '../assets/sound/jump.mp3')] public static const SoundJump:Class;
     [Embed(source = '../assets/sound/hurt.mp3')] public static const SoundHurt:Class;
+    [Embed(source = '../assets/sound/coin.mp3')] public static const SoundCoin:Class;
 
   }
 

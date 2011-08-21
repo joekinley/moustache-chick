@@ -9,8 +9,11 @@ package
   import org.flixel.FlxGroup;
   import org.flixel.FlxPoint;
   import org.flixel.FlxParticle;
+  import org.flixel.FlxObject;
   import org.flixel.FlxG;
   import org.flixel.FlxRect;
+  import org.flixel.FlxText;
+  import org.flixel.system.FlxTile;
 
   public class Game extends FlxState
   {
@@ -31,6 +34,9 @@ package
     private var lavaAnimationTimer:Number;
 
     private var collectibleAnimationTimer:Number;
+
+    private var score:FlxText;
+    private var health:FlxText;
 
     public function Game( number:int, tileset:Class )
     {
@@ -54,6 +60,7 @@ package
       this.lavaTimer = 0;
       this.lavaNewTimer = 0;
       this.lavaAnimationTimer = 0;
+      this.collectibleAnimationTimer = 0;
       this.lavaLevel = this.level.heightInTiles;
 
       // initialize player
@@ -75,6 +82,17 @@ package
       FlxG.camera.follow( player );
       FlxG.camera.setBounds( 0, 0, level.width, level.height );
       FlxG.worldBounds = new FlxRect( 0, 0, level.width, level.height );
+
+      // initialize hud
+      score = new FlxText( 10, 10, 50, 'Score: ' + Globals.score );
+      score.scrollFactor.x = 0;
+      score.scrollFactor.y = 0;
+      add( score );
+
+      health = new FlxText( FlxG.camera.width - 60, 10, 50, 'Health: ' + Globals.health );
+      health.scrollFactor.x = 0;
+      health.scrollFactor.y = 0;
+      add( health );
     }
 
     override public function update( ):void {
@@ -108,6 +126,15 @@ package
         FlxG.switchState( newLevel );
       }
 
+      // HUD
+      this.score.text = 'Score: ' + Globals.score;
+      this.health.text = 'Health: ' + Globals.health;
+
+      // loose condition
+      if ( Globals.health <= 0 ) {
+        FlxG.switchState( new MenuState );
+      }
+
       super.update( );
     }
 
@@ -119,7 +146,7 @@ package
         case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 );
         case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 25 );
         case 3: return FlxTilemap.arrayToCSV( Levels.level3( ), 25 );
-        case 4: return FlxTilemap.arrayToCSV( Levels.level4( ), 5 );
+        case 4: return FlxTilemap.arrayToCSV( Levels.level4( ), 6 );
         case 5: return FlxTilemap.arrayToCSV( Levels.level5( ), 50 );
 
         default: return FlxTilemap.arrayToCSV( Levels.generateLevel( 30, 30 ), 30 );
@@ -136,6 +163,13 @@ package
       }
       this.lava = new FlxTilemap;
       this.lava.loadMap( FlxTilemap.arrayToCSV( lavaData, level.widthInTiles ), this.Tiles, Globals.TILE_WIDTH, Globals.TILE_HEIGHT, 0, 1, 1, 1 );
+
+      //set special callbacks for certain tiles
+      this.lava.setTileProperties( 12, FlxObject.NONE, this.lavaCollision, null, 3 ); // lava
+      this.lava.setTileProperties( 24, FlxObject.NONE, this.lavaCollision, null, 9 ); // lava
+      this.lava.setTileProperties( 19, FlxObject.NONE, this.coinCollision, null, 2 ); // coins
+      this.lava.setTileProperties( 33, FlxObject.NONE, this.heartCollision, null, 3 ); // hearts
+
       this.layerObjects.add( this.lava );
     }
 
@@ -143,7 +177,11 @@ package
 
       for ( var i:int = 0; i < level.widthInTiles * level.heightInTiles; i++ ) {
         if ( this.level.getTileByIndex( i ) == Globals.TILES_COLLECTIBLE_INDICATOR ) {
-          this.lava.setTileByIndex( i, Globals.randomNumber( 21, 19 ) );
+          this.lava.setTileByIndex( i, 19 );
+          this.level.setTileByIndex( i, 0 );
+        } else if ( this.level.getTileByIndex( i ) == Globals.TILES_HEART_INDICATOR ) {
+          this.lava.setTileByIndex( i, 33 );
+          this.level.setTileByIndex( i, 0 );
         }
       }
     }
@@ -291,11 +329,18 @@ package
       var currentTile:int;
       for ( var i:int = 0; i < this.lava.widthInTiles * this.lava.heightInTiles; i++ ) {
         currentTile = this.lava.getTileByIndex( i );
-trace( 'CURRENT TILE ' + currentTile );
+        // moustache combs
         if ( currentTile == 19 ) {
           this.lava.setTileByIndex( i, 20 );
         } else if ( currentTile == 20 ) {
           this.lava.setTileByIndex( i, 19 );
+        }
+
+        // hearts
+        else if ( currentTile == 33 || currentTile == 34 ) {
+          this.lava.setTileByIndex( i, currentTile+1 );
+        } else if ( currentTile == 35 ) {
+          this.lava.setTileByIndex( i, 33 );
         }
       }
     }
@@ -327,12 +372,28 @@ trace( 'CURRENT TILE ' + currentTile );
       return false;
     }
 
-    public function lavaCollision( object1:Object, object2:Object ):void {
+    public function lavaCollision( tile:FlxTile, obj:FlxObject ):void {
 
+      // hurt collision with lava
       if( !this.player.flickering ) {
         FlxG.play( Globals.SoundHurt, 0.5 )
         this.player.flicker( 3 );
+        Globals.health--;
       }
+    }
+
+    public function coinCollision( tile:FlxTile, obj:FlxObject ):void {
+
+      FlxG.play( Globals.SoundCoin, 0.5 );
+      this.lava.setTileByIndex( tile.mapIndex, 0 );
+      Globals.score++;
+    }
+
+    public function heartCollision( tile:FlxTile, obj:FlxObject ):void {
+
+      FlxG.play( Globals.SoundCoin, 0.5 );
+      this.lava.setTileByIndex( tile.mapIndex, 0 );
+      Globals.health++;
     }
 
     // used for debug stuff

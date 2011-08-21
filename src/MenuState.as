@@ -12,6 +12,7 @@ package
 			FlxG.mouse.show();
 			startButton = new FlxButton(120, 90, "Start Game", startGame);
 			add(startButton);
+      FlxG.music.stop( );
 		}
 		private function startGame():void
 		{
