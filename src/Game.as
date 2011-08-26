@@ -57,7 +57,7 @@ package
       layerBackground = new FlxGroup;
 
       // initialize background group; tile it 5x10
-      for ( var i:int = 0; i < 5; i++ ) {
+      for ( var i:int = 0; i < 6; i++ ) {
         for ( var j:int = 0; j < 10; j++ ) {
           var oneTile:FlxSprite = new FlxSprite( j * 160, i * 160, Globals.Background );
           this.layerBackground.add( oneTile );
@@ -160,9 +160,14 @@ package
 
       // loose condition
       if ( Globals.health <= 0 || !this.player.onScreen( ) ) {
-        FlxG.switchState( new MenuState );
+        //FlxG.switchState( new MenuState );
+        Globals.score -= Globals.GAME_LOST_LIFE_LOSE_SCORE;
+        var thisLevel:Game = new Game( this.gameLevel, Tiles );
+        FlxG.switchState( thisLevel );
       }
 
+      // no negative score
+      if ( Globals.score <= 0 ) Globals.score = 0;
       super.update( );
     }
 
@@ -172,17 +177,28 @@ package
       switch( number ) {
         case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 10 ); break;
         case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 ); break;
-        case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 25 ); break;
-        case 3: return FlxTilemap.arrayToCSV( Levels.level3( ), 25 ); break;
-        case 4: return FlxTilemap.arrayToCSV( Levels.level4( ), 6 ); break;
-        case 5: return FlxTilemap.arrayToCSV( Levels.level5( ), 50 ); break;
-        case 6: return FlxTilemap.arrayToCSV( Levels.level6( ), 30 ); break;
-        case 7: return FlxTilemap.arrayToCSV( Levels.level7( ), 50 ); break;
-        case 8: return FlxTilemap.arrayToCSV( Levels.level8( ), 27 ); break;
+        case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 15 ); break;
+        case 3: return FlxTilemap.arrayToCSV( Levels.level3( ), 20 ); break;
+        case 4: return FlxTilemap.arrayToCSV( Levels.level4( ), 30 ); break;
+        case 5: return FlxTilemap.arrayToCSV( Levels.level5( ), 10 ); break;
+        case 6: return FlxTilemap.arrayToCSV( Levels.level6( ), 16 ); break;
+        case 7: return FlxTilemap.arrayToCSV( Levels.level7( ), 19 ); break;
+        case 8: return FlxTilemap.arrayToCSV( Levels.level8( ), 64 ); break;
+        case 9: return FlxTilemap.arrayToCSV( Levels.level9( ), 6 ); break;
+        case 10: return FlxTilemap.arrayToCSV( Levels.level10( ), 25 ); break;
+        
+        case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
+        case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
+        case 33: return FlxTilemap.arrayToCSV( Levels.level33( ), 6 ); break;
+        case 34: return FlxTilemap.arrayToCSV( Levels.level34( ), 50 ); break;
+        case 35: return FlxTilemap.arrayToCSV( Levels.level35( ), 30 ); break;
+        case 36: return FlxTilemap.arrayToCSV( Levels.level36( ), 50 ); break;
+        case 46: return FlxTilemap.arrayToCSV( Levels.level46( ), 27 ); break;
 
         default:
           Globals.hasWhip = true;
-          return FlxTilemap.arrayToCSV( Levels.generateLevel( 30, 30 ), 30 );
+          //return FlxTilemap.arrayToCSV( Levels.generateLevel( 30, 30 ), 30 );
+          return FlxTilemap.arrayToCSV( Levels.level0( ), 10 ); break;
           break;
       }
 
@@ -234,7 +250,7 @@ package
 
       // advance in movement
       // all lava does one step down if downtile is no floor; thus crushes items and all
-      // if bottom tile is a floor tile; advance either left or right (chance); with a little chance of advancing to both sides
+      // if bottom tile is a floor tile; advance either left or right
       for ( i = level.widthInTiles*level.heightInTiles; i > 0; i-- ) {
 
         // set bottom indicator
@@ -247,24 +263,28 @@ package
         // advance lava
         if ( this.isLava( thisTileLava ) ) { // only advance lava
 
-          if ( this.isFloor( thisTileLevel ) && this.isLava( thisTileLava, 4 ) ) { // do not move hardened lava
+          if ( this.isLava( thisTileLava, 4 ) && this.isFloor( thisTileLevel ) ) { // do not move hardened lava
             continue;
-          } else if ( this.isFloor( bottomTileLevel ) ) { // if i is a floor, advance left or right
-            if ( this.isLava( thisTileLava, 2 ) && !this.isFloor( leftTileLevel ) ) { // advance left flowing lava
+          } else if ( this.isFloor( bottomTileLevel ) || this.isLava( bottomTileLava, 4 ) ) { // if i is a floor, advance left or right
+            if ( left != -1 && this.isLava( thisTileLava, 2 ) && !this.isFloor( leftTileLevel ) && !this.isLava( leftTileLava, 4 ) ) { // advance left flowing lava
               this.lava.setTileByIndex( left, thisTileLava );
               this.lava.setTileByIndex( i, 0 );
-              i--; // advance further, otherwise this tile gets computed twice
-            } else if ( this.isLava( thisTileLava, 3 ) && !this.isFloor( rightTileLevel ) ) { // advance right flowing lava
+              if( left != -1 ) i--; // advance further, otherwise this tile gets computed twice; only if not leftmost
+            } else if ( right != -1 && this.isLava( thisTileLava, 3 ) && !this.isFloor( rightTileLevel ) && !this.isLava( rightTileLava, 4 ) ) { // advance right flowing lava
               this.lava.setTileByIndex( right, thisTileLava );
               this.lava.setTileByIndex( i, 0 );
             } else { // decide which way to flow
               rand = Math.random( ) * 100;
               if ( left != -1 && rand % 2 == 0 && !this.isFloor( leftTileLevel ) && !this.isLava( leftTileLava ) ) { // just flow left
-                this.lava.setTileByIndex( i, Globals.randomNumber( 30, 27 ) );
-                i--; // advance counter by one, otherwise we will move the left tile again here
+                this.lava.setTileByIndex( i, 27 );
+                if( left != -1 ) i--; // advance counter by one, otherwise we will move the left tile again here
               } else if( right != -1 && !this.isFloor( rightTileLevel ) && !this.isLava( rightTileLava ) ) { // just flow right
-                this.lava.setTileByIndex( i, Globals.randomNumber( 33, 30 ) );
-              }
+                this.lava.setTileByIndex( i, 30 );
+              } else if ( ( this.isFloor( leftTileLevel ) || this.isLava( leftTileLava ) )
+			           && ( this.isFloor( rightTileLevel ) || this.isLava( rightTileLava ) ) ) { // error case, apparently this lava tile is trapped, so just make it hardened
+				this.lava.setTileByIndex( i, 24 );
+				this.level.setTileByIndex( i, 21 );
+			  }
             }
           } else if( !this.isLava( bottomTileLava ) ) {
             // if below is free, fall down
@@ -279,7 +299,7 @@ package
         for ( i = 0; i < level.widthInTiles * level.heightInTiles; i++ ) {
           if ( Math.random( ) * 100 < Globals.GAME_LAVA_SPREAD_POSSIBILITY && this.level.getTileByIndex( i ) == Globals.TILES_LAVA_SOURCE ) {
             this.lava.setTileByIndex( i + level.widthInTiles, 12 );
-          }
+          }                                
         }
         this.lavaTimer = 0;
       }
@@ -297,31 +317,43 @@ package
 
         // make lava falling again
         if ( !this.isLava( thisTileLava, 1 ) && this.isLava( thisTileLava ) && !this.isFloor( bottomTileLevel ) ) {
-          rand = Globals.randomNumber( 15, 12 );
-          this.lava.setTileByIndex( i, rand );
-          thisTileLava = rand;
-        }
+          this.lava.setTileByIndex( i, 12 ); thisTileLava = 12;
+        } 
+        // check hardened lava for correct behaviour
+        if ( this.lavaLevel - 1 > (i + 1) / level.widthInTiles && this.isLava( thisTileLava, 4 ) && this.isFloor( thisTileLevel ) ) {
+          if ( !this.isFloor( leftTileLevel ) || !this.isFloor( rightTileLevel ) ) {
+            rand = Math.random( ) * 100;
+            if ( rand % 2 == 0 && !this.isFloor( leftTileLevel )  ) { // flow left
+              this.lava.setTileByIndex( i, 27 ); thisTileLava = 27;
+              this.level.setTileByIndex( i, 0 ); thisTileLevel = 0;
+            } else if ( !this.isFloor( rightTileLevel ) ) {
+              this.lava.setTileByIndex( i, 30 ); thisTileLava = 30;
+              this.level.setTileByIndex( i, 0 ); thisTileLevel = 0;
+            }
+          }
+        } else if ( this.lavaLevel <= (i + 1) / level.widthInTiles && !this.isLava( thisTileLava ) && !this.isFloor( thisTileLevel ) ) { // also check hardened levels if there are any gaps; if so, just close them directly
+          this.lava.setTileByIndex( i, 24 ); thisTileLava = 24;
+          this.level.setTileByIndex( i, 21 ); thisTileLevel = 21;
+        } // TODO: better make a recursive function to check wether the current tile is able to flow anywhere; only for lava on the lavaLevel or below
+		
         // harden lava if surrounded by lava or floor
         if ( this.isLava( thisTileLava ) && !this.isFloor( thisTileLevel )
-        && ( this.isLava( leftTileLava ) || this.isFloor( leftTileLevel ) )
-        && ( this.isLava( rightTileLava ) || this.isFloor( rightTileLevel ) )
-        && ( this.isLava( bottomTileLava ) || this.isFloor( bottomTileLevel ) ) ) {
+        && ( this.isLava( leftTileLava, 4 ) || this.isFloor( leftTileLevel ) )
+        && ( this.isLava( rightTileLava, 4 ) || this.isFloor( rightTileLevel ) )
+        && ( this.isLava( bottomTileLava, 4 ) || this.isFloor( bottomTileLevel ) ) ) {
 
-          this.lava.setTileByIndex( i, 24 );
-
-          if ( this.isLava( topTileLava ) && thisTileLevel == 0 ) {
-            this.level.setTileByIndex( i, Globals.TILES_WALL );
-            this.lava.setTileByIndex( i, 0 );
-          }
+          this.lava.setTileByIndex( i, 24 ); thisTileLava = 24;
+		      this.level.setTileByIndex( i, 21 ); thisTileLevel = 21;
         }
 
         // lava on the bottom shall harden on the edges
         if ( this.isLava( thisTileLava ) && this.lavaLevel - 1 <=  (i + 1) / level.widthInTiles ) {
 
-          if ( ( this.isLava( thisTileLava, 2 ) && this.isFloor( leftTileLevel ) )
-          || ( this.isLava( thisTileLava, 3 ) && this.isFloor( rightTileLevel ) ) ) {
-            this.level.setTileByIndex( i, Globals.TILES_WALL );
-            this.lava.setTileByIndex( i, 24 );
+          if ( ( this.isLava( thisTileLava, 2 ) && ( this.isFloor( leftTileLevel ) || this.isLava( leftTileLava, 4 ) ) )
+          || ( this.isLava( thisTileLava, 3 ) && ( this.isFloor( rightTileLevel ) || this.isLava( rightTileLava, 4 ) ) ) ) {
+            
+			      this.lava.setTileByIndex( i, 24 ); thisTileLava = 24;
+			      this.level.setTileByIndex( i, 22 ); thisTileLevel = 22;
           }
         }
 
@@ -413,6 +445,7 @@ package
         FlxG.play( Globals.SoundHurt, 0.5 )
         this.player.flicker( 3 );
         Globals.health--;
+        Globals.score -= Globals.GAME_HIT_LAVA_LOSE_SCORE;
       }
     }
 

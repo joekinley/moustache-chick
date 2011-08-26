@@ -20,11 +20,13 @@ package
 
     // game constants
     public static const GAME_GRAVITY:int = 200;
-    public static const GAME_LAVA_SPREAD_POSSIBILITY:int = 25; // x percent chance of lava spreading to both sides
+    public static const GAME_LAVA_SPREAD_POSSIBILITY:int = 100; // x percent chance of lava spreading to both sides
     public static const GAME_LAVA_SPEED:Number = 0.10; // in seconds how often lava update routine has to be called (0.20)
-    public static const GAME_LAVA_NEW:Number = 0.5; // in seconds when a new lava shall appear (2)
+    public static const GAME_LAVA_NEW:Number = 1.5; // in seconds when a new lava shall appear (2)
     public static const GAME_LAVA_ANIMATION_SPEED:Number = 0.25; // animation speed for lava
     public static const GAME_COLLECTIBLE_ANIMATION_SPEED:Number = 0.5; // animation speed of collectibles
+    public static const GAME_LOST_LIFE_LOSE_SCORE:int = 10; // lose this amount of score when dying
+    public static const GAME_HIT_LAVA_LOSE_SCORE:int = 2; // lose this amount of score when hitting lavas
     public static const PLAYER_SPEED:int = 120;
     public static const PLAYER_JUMP:int = 800;
     public static const PLAYER_JUMP_MAX:Number = 0.25;
