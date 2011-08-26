@@ -441,7 +441,7 @@ package
     public function lavaCollision( tile:FlxTile, obj:FlxObject ):void {
       
       // hurt collision with lava
-      if( !this.player.flickering ) {
+      if( !this.player.flickering && obj.x - tile.x > 20 ) { // tilemap collision hack on right side of player
         FlxG.play( Globals.SoundHurt, 0.5 )
         this.player.flicker( 3 );
         Globals.health--;

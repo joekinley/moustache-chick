@@ -21,8 +21,8 @@ package
       loadGraphic( Sprites, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
 
       // correct sprite bounds
-      width = 13; // collision box tweak
-      offset.x = 13;
+      width = 14; // collision box tweak
+      offset.x = 14;
       centerOffsets( );
       drag.x = Globals.PLAYER_SPEED * 8;
       drag.y = Globals.PLAYER_SPEED * 8;
