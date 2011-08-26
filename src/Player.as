@@ -20,7 +20,10 @@ package
       this.Sprites = mySprites;
       loadGraphic( Sprites, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
 
-      width = 12; // collision box tweak
+      // correct sprite bounds
+      width = 13; // collision box tweak
+      offset.x = 13;
+      centerOffsets( );
       drag.x = Globals.PLAYER_SPEED * 8;
       drag.y = Globals.PLAYER_SPEED * 8;
       maxVelocity.x = Globals.PLAYER_SPEED;
@@ -49,7 +52,7 @@ package
     }
 
     override public function update( ):void {
-
+      
       velocity.x = 0;
       //facingDir = 'center';
       whipSprite.play( 'up' );

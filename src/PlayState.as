@@ -15,8 +15,8 @@ package
       FlxG.playMusic( Music );// play music
       Globals.health = Globals.PLAYER_MAX_HEALTH;
       Globals.score = 0;
-
-      var game:Game = new Game( 1, Tiles );
+FlxG.debug = true;
+      var game:Game = new Game( 33, Tiles );
       FlxG.switchState( game );
     }
 

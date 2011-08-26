@@ -4,8 +4,9 @@ package
 	public class MenuState extends FlxState
 	{
 		private var startButton:FlxButton;
-		public function MenuState()
+		public function MenuState():void
 		{
+      super( );
 		}
 		override public function create():void
 		{

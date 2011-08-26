@@ -439,7 +439,7 @@ package
     }
 
     public function lavaCollision( tile:FlxTile, obj:FlxObject ):void {
-
+      
       // hurt collision with lava
       if( !this.player.flickering ) {
         FlxG.play( Globals.SoundHurt, 0.5 )

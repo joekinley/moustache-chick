@@ -15,7 +15,7 @@ package org.flixel.system
 	import flash.text.TextFormat;
 	import flash.utils.getDefinitionByName;
 	import flash.utils.getTimer;
-	
+
 	import org.flixel.FlxG;
 
 	/**
@@ -76,18 +76,18 @@ package org.flixel.system
 		 * Change this if you want the flixel logo to show for more or less time.  Default value is 0 seconds.
 		 */
 		public var minDisplayTime:Number;
-		
+
 		/**
 		 * Constructor
 		 */
 		public function FlxPreloader()
 		{
 			minDisplayTime = 0;
-			
+
 			stop();
             stage.scaleMode = StageScaleMode.NO_SCALE;
 			stage.align = StageAlign.TOP_LEFT;
-			
+
 			//Check if we are on debug or release mode and set _DEBUG accordingly
             try
             {
@@ -98,20 +98,20 @@ package org.flixel.system
                 var re:RegExp = /\[.*:[0-9]+\]/;
                 FlxG.debug = re.test(E.getStackTrace());
             }
-			
+
 			var tmp:Bitmap;
 			if(!FlxG.debug && (myURL != null) && (root.loaderInfo.url.indexOf(myURL) < 0))
 			{
 				tmp = new Bitmap(new BitmapData(stage.stageWidth,stage.stageHeight,true,0xFFFFFFFF));
 				addChild(tmp);
-				
+
 				var format:TextFormat = new TextFormat();
 				format.color = 0x000000;
 				format.size = 16;
 				format.align = "center";
 				format.bold = true;
 				format.font = "system";
-				
+
 				var textField:TextField = new TextField();
 				textField.width = tmp.width-16;
 				textField.height = tmp.height-16;
@@ -122,7 +122,7 @@ package org.flixel.system
 				textField.defaultTextFormat = format;
 				textField.text = "Hi there!  It looks like somebody copied this game without my permission.  Just click anywhere, or copy-paste this URL into your browser.\n\n"+myURL+"\n\nto play the game at my site.  Thanks, and have fun!";
 				addChild(textField);
-				
+
 				textField.addEventListener(MouseEvent.CLICK,goToMyURL);
 				tmp.addEventListener(MouseEvent.CLICK,goToMyURL);
 				return;
@@ -130,12 +130,12 @@ package org.flixel.system
 			this._init = false;
 			addEventListener(Event.ENTER_FRAME, onEnterFrame);
 		}
-		
+
 		private function goToMyURL(event:MouseEvent=null):void
 		{
 			navigateToURL(new URLRequest("http://"+myURL));
 		}
-		
+
 		private function onEnterFrame(event:Event):void
         {
 			if(!this._init)
@@ -165,9 +165,10 @@ package org.flixel.system
 				if((_min > 0) && (percent > time/_min))
 					percent = time/_min;
             	update(percent);
+        trace( 'min in action' );
 			}
         }
-		
+
 		/**
 		 * Override this to create your own preloader objects.
 		 * Highly recommended you also override update()!
@@ -233,7 +234,7 @@ package org.flixel.system
 			bitmap.alpha = 0.25;
 			_buffer.addChild(bitmap);
 		}
-		
+
 		protected function destroy():void
 		{
 			removeChild(_buffer);
@@ -243,10 +244,10 @@ package org.flixel.system
 			_logo = null;
 			_logoGlow = null;
 		}
-		
+
 		/**
 		 * Override this function to manually update the preloader.
-		 * 
+		 *
 		 * @param	Percent		How much of the program has loaded.
 		 */
 		protected function update(Percent:Number):void
