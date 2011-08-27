@@ -162,6 +162,7 @@ package
       if ( Globals.health <= 0 || !this.player.onScreen( ) ) {
         //FlxG.switchState( new MenuState );
         Globals.score -= Globals.GAME_LOST_LIFE_LOSE_SCORE;
+        Globals.health = Globals.PLAYER_MAX_HEALTH;
         var thisLevel:Game = new Game( this.gameLevel, Tiles );
         FlxG.switchState( thisLevel );
       }
@@ -186,6 +187,9 @@ package
         case 8: return FlxTilemap.arrayToCSV( Levels.level8( ), 64 ); break;
         case 9: return FlxTilemap.arrayToCSV( Levels.level9( ), 6 ); break;
         case 10: return FlxTilemap.arrayToCSV( Levels.level10( ), 25 ); break;
+        case 11: return FlxTilemap.arrayToCSV( Levels.level11( ), 30 ); break;
+        case 12: return FlxTilemap.arrayToCSV( Levels.level12( ), 50 ); break;
+        case 13: return FlxTilemap.arrayToCSV( Levels.level13( ), 5 ); break;
         
         case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
         case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
@@ -274,16 +278,16 @@ package
               this.lava.setTileByIndex( right, thisTileLava );
               this.lava.setTileByIndex( i, 0 );
             } else { // decide which way to flow
-              rand = Math.random( ) * 100;
-              if ( left != -1 && rand % 2 == 0 && !this.isFloor( leftTileLevel ) && !this.isLava( leftTileLava ) ) { // just flow left
+             
+              if ( left != -1 && !this.isFloor( leftTileLevel ) && !this.isLava( leftTileLava ) ) { // just flow left
                 this.lava.setTileByIndex( i, 27 );
                 if( left != -1 ) i--; // advance counter by one, otherwise we will move the left tile again here
               } else if( right != -1 && !this.isFloor( rightTileLevel ) && !this.isLava( rightTileLava ) ) { // just flow right
                 this.lava.setTileByIndex( i, 30 );
               } else if ( ( this.isFloor( leftTileLevel ) || this.isLava( leftTileLava ) )
 			           && ( this.isFloor( rightTileLevel ) || this.isLava( rightTileLava ) ) ) { // error case, apparently this lava tile is trapped, so just make it hardened
-				this.lava.setTileByIndex( i, 24 );
-				this.level.setTileByIndex( i, 21 );
+                this.lava.setTileByIndex( i, 24 );
+                this.level.setTileByIndex( i, 21 );
 			  }
             }
           } else if( !this.isLava( bottomTileLava ) ) {
@@ -297,7 +301,7 @@ package
       // create new lava
       if ( this.lavaTimer > Globals.GAME_LAVA_NEW ) {
         for ( i = 0; i < level.widthInTiles * level.heightInTiles; i++ ) {
-          if ( Math.random( ) * 100 < Globals.GAME_LAVA_SPREAD_POSSIBILITY && this.level.getTileByIndex( i ) == Globals.TILES_LAVA_SOURCE ) {
+          if ( this.level.getTileByIndex( i ) == Globals.TILES_LAVA_SOURCE ) {
             this.lava.setTileByIndex( i + level.widthInTiles, 12 );
           }                                
         }
@@ -322,8 +326,8 @@ package
         // check hardened lava for correct behaviour
         if ( this.lavaLevel - 1 > (i + 1) / level.widthInTiles && this.isLava( thisTileLava, 4 ) && this.isFloor( thisTileLevel ) ) {
           if ( !this.isFloor( leftTileLevel ) || !this.isFloor( rightTileLevel ) ) {
-            rand = Math.random( ) * 100;
-            if ( rand % 2 == 0 && !this.isFloor( leftTileLevel )  ) { // flow left
+            
+            if ( !this.isFloor( leftTileLevel )  ) { // flow left
               this.lava.setTileByIndex( i, 27 ); thisTileLava = 27;
               this.level.setTileByIndex( i, 0 ); thisTileLevel = 0;
             } else if ( !this.isFloor( rightTileLevel ) ) {
@@ -439,9 +443,9 @@ package
     }
 
     public function lavaCollision( tile:FlxTile, obj:FlxObject ):void {
-      
+      //trace( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) );
       // hurt collision with lava
-      if( !this.player.flickering && obj.x - tile.x > 20 ) { // tilemap collision hack on right side of player
+      if( !this.player.flickering && Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 ) { // tilemap collision hack on right side of player
         FlxG.play( Globals.SoundHurt, 0.5 )
         this.player.flicker( 3 );
         Globals.health--;
