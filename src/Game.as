@@ -30,7 +30,6 @@ package
     private var player:Player;
     private var gameLevel:int;
 
-    private var lavaLevel:int; // height level of lava
     private var lavaTimer:Number;
     private var lavaNewTimer:Number;
     private var lavaAnimationTimer:Number;
@@ -75,7 +74,6 @@ package
       this.lavaNewTimer = 0;
       this.lavaAnimationTimer = 0;
       this.collectibleAnimationTimer = 0;
-      this.lavaLevel = this.level.heightInTiles;
 
       // initialize player
       var startPoint:FlxPoint = level.getTileCoords( Globals.TILES_PLAYER_START, false )[ 0 ];
@@ -176,6 +174,7 @@ package
     public function getLevel( number:int ):String {
 
       switch( number ) {
+        case -1: return FlxTilemap.arrayToCSV( Levels.level01( ), 8 ); break;
         case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 10 ); break;
         case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 ); break;
         case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 15 ); break;
@@ -190,6 +189,7 @@ package
         case 11: return FlxTilemap.arrayToCSV( Levels.level11( ), 30 ); break;
         case 12: return FlxTilemap.arrayToCSV( Levels.level12( ), 50 ); break;
         case 13: return FlxTilemap.arrayToCSV( Levels.level13( ), 5 ); break;
+        case 14: return FlxTilemap.arrayToCSV( Levels.level14( ), 60 ); break;
         
         case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
         case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
@@ -252,6 +252,19 @@ package
       var doAnimate:Boolean = false;
       if ( this.lavaAnimationTimer > Globals.GAME_LAVA_ANIMATION_SPEED ) doAnimate = true;
 
+      /*
+      // advance lava movement
+        // if bottom is free, fall down
+        // else if free flow (by tick: left-right-left-right....)
+        // else harden
+        
+       // correct animation
+        // if bottom free, make it falling
+        // else if not hardened and left free, make it left flowing
+        // else if not hardened and right free, make it right flowing
+        // if leftmost or rightmost and !couldFall, make it hardened
+      */
+      
       // advance in movement
       // all lava does one step down if downtile is no floor; thus crushes items and all
       // if bottom tile is a floor tile; advance either left or right
@@ -269,31 +282,30 @@ package
 
           if ( this.isLava( thisTileLava, 4 ) && this.isFloor( thisTileLevel ) ) { // do not move hardened lava
             continue;
-          } else if ( this.isFloor( bottomTileLevel ) || this.isLava( bottomTileLava, 4 ) ) { // if i is a floor, advance left or right
-            if ( left != -1 && this.isLava( thisTileLava, 2 ) && !this.isFloor( leftTileLevel ) && !this.isLava( leftTileLava, 4 ) ) { // advance left flowing lava
-              this.lava.setTileByIndex( left, thisTileLava );
-              this.lava.setTileByIndex( i, 0 );
+          } else if ( this.isFloor( bottomTileLevel ) ) { // if i is a floor, advance left or right
+            if ( left != -1 && this.isLava( thisTileLava, 2 ) && !this.isFloor( leftTileLevel ) ) { // advance left flowing lava
+              this.lava.setTileByIndex( left, thisTileLava ); leftTileLava = thisTileLava;
+              this.lava.setTileByIndex( i, 0 ); thisTileLava = 0;
               if( left != -1 ) i--; // advance further, otherwise this tile gets computed twice; only if not leftmost
-            } else if ( right != -1 && this.isLava( thisTileLava, 3 ) && !this.isFloor( rightTileLevel ) && !this.isLava( rightTileLava, 4 ) ) { // advance right flowing lava
-              this.lava.setTileByIndex( right, thisTileLava );
-              this.lava.setTileByIndex( i, 0 );
+            } else if ( right != -1 && this.isLava( thisTileLava, 3 ) && !this.isFloor( rightTileLevel ) ) { // advance right flowing lava
+              this.lava.setTileByIndex( right, thisTileLava ); rightTileLava = thisTileLava;
+              this.lava.setTileByIndex( i, 0 ); thisTileLava = 0;
             } else { // decide which way to flow
              
-              if ( left != -1 && !this.isFloor( leftTileLevel ) && !this.isLava( leftTileLava ) ) { // just flow left
-                this.lava.setTileByIndex( i, 27 );
+              if ( left != -1 && !this.isFloor( leftTileLevel ) ) { // just flow left
+                this.lava.setTileByIndex( i, 27 ); thisTileLava = 27;
                 if( left != -1 ) i--; // advance counter by one, otherwise we will move the left tile again here
-              } else if( right != -1 && !this.isFloor( rightTileLevel ) && !this.isLava( rightTileLava ) ) { // just flow right
-                this.lava.setTileByIndex( i, 30 );
-              } else if ( ( this.isFloor( leftTileLevel ) || this.isLava( leftTileLava ) )
-			           && ( this.isFloor( rightTileLevel ) || this.isLava( rightTileLava ) ) ) { // error case, apparently this lava tile is trapped, so just make it hardened
-                this.lava.setTileByIndex( i, 24 );
-                this.level.setTileByIndex( i, 21 );
-			  }
+              } else if( right != -1 && !this.isFloor( rightTileLevel ) ) { // just flow right
+                this.lava.setTileByIndex( i, 30 ); thisTileLava = 30;
+              } else if ( this.isFloor( leftTileLevel ) || this.isFloor( rightTileLevel ) ) { // error case, apparently this lava tile is trapped, so just make it hardened
+                this.lava.setTileByIndex( i, 24 ); thisTileLava = 24;
+                this.level.setTileByIndex( i, 21 ); thisTileLevel = 21;
+			        }
             }
           } else if( !this.isLava( bottomTileLava ) ) {
             // if below is free, fall down
-            this.lava.setTileByIndex( bottom, thisTileLava );
-            this.lava.setTileByIndex( i, 0 );
+            this.lava.setTileByIndex( bottom, thisTileLava ); bottomTileLava = thisTileLava;
+            this.lava.setTileByIndex( i, 0 ); thisTileLava = 0;
           }
         }
       }
@@ -323,44 +335,29 @@ package
         if ( !this.isLava( thisTileLava, 1 ) && this.isLava( thisTileLava ) && !this.isFloor( bottomTileLevel ) ) {
           this.lava.setTileByIndex( i, 12 ); thisTileLava = 12;
         } 
+        
         // check hardened lava for correct behaviour
-        if ( this.lavaLevel - 1 > (i + 1) / level.widthInTiles && this.isLava( thisTileLava, 4 ) && this.isFloor( thisTileLevel ) ) {
-          if ( !this.isFloor( leftTileLevel ) || !this.isFloor( rightTileLevel ) ) {
-            
-            if ( !this.isFloor( leftTileLevel )  ) { // flow left
-              this.lava.setTileByIndex( i, 27 ); thisTileLava = 27;
-              this.level.setTileByIndex( i, 0 ); thisTileLevel = 0;
-            } else if ( !this.isFloor( rightTileLevel ) ) {
-              this.lava.setTileByIndex( i, 30 ); thisTileLava = 30;
-              this.level.setTileByIndex( i, 0 ); thisTileLevel = 0;
-            }
-          }
-        } else if ( this.lavaLevel <= (i + 1) / level.widthInTiles && !this.isLava( thisTileLava ) && !this.isFloor( thisTileLevel ) ) { // also check hardened levels if there are any gaps; if so, just close them directly
-          this.lava.setTileByIndex( i, 24 ); thisTileLava = 24;
-          this.level.setTileByIndex( i, 21 ); thisTileLevel = 21;
-        } // TODO: better make a recursive function to check wether the current tile is able to flow anywhere; only for lava on the lavaLevel or below
-		
+        // if leftmost lava and !canFall, harden it
+        if ( this.isLava( thisTileLava ) && this.isFloor( bottomTileLevel )
+          && ( ( this.isLava( thisTileLava, 2 ) && this.isFloor( leftTileLevel ) && !this.couldFall( i ) )
+            || ( this.isLava( thisTileLava, 3 ) && this.isFloor( rightTileLevel ) && !this.couldFall( i ) ) ) ) {
+              
+            this.lava.setTileByIndex( i, 24 ); thisTileLava = 24;
+            this.level.setTileByIndex( i, 21 ); thisTileLevel = 21;
+        }
+        
         // harden lava if surrounded by lava or floor
-        if ( this.isLava( thisTileLava ) && !this.isFloor( thisTileLevel )
-        && ( this.isLava( leftTileLava, 4 ) || this.isFloor( leftTileLevel ) )
-        && ( this.isLava( rightTileLava, 4 ) || this.isFloor( rightTileLevel ) )
-        && ( this.isLava( bottomTileLava, 4 ) || this.isFloor( bottomTileLevel ) ) ) {
+        if ( this.isLava( thisTileLava ) 
+        && !this.isFloor( thisTileLevel )
+        && this.isFloor( leftTileLevel )
+        && this.isFloor( rightTileLevel )
+        && this.isFloor( bottomTileLevel ) ) {
 
           this.lava.setTileByIndex( i, 24 ); thisTileLava = 24;
 		      this.level.setTileByIndex( i, 21 ); thisTileLevel = 21;
         }
 
-        // lava on the bottom shall harden on the edges
-        if ( this.isLava( thisTileLava ) && this.lavaLevel - 1 <=  (i + 1) / level.widthInTiles ) {
-
-          if ( ( this.isLava( thisTileLava, 2 ) && ( this.isFloor( leftTileLevel ) || this.isLava( leftTileLava, 4 ) ) )
-          || ( this.isLava( thisTileLava, 3 ) && ( this.isFloor( rightTileLevel ) || this.isLava( rightTileLava, 4 ) ) ) ) {
-            
-			      this.lava.setTileByIndex( i, 24 ); thisTileLava = 24;
-			      this.level.setTileByIndex( i, 22 ); thisTileLevel = 22;
-          }
-        }
-
+        // handle animation
         if ( doAnimate ) {
           // falling lava
           if ( thisTileLava == 12 || thisTileLava == 13 ) this.lava.setTileByIndex( i, thisTileLava + 1 );
@@ -381,17 +378,6 @@ package
           this.lavaAnimationTimer = 0;
         }
       }
-
-      // if a complete row is full of lava tiles or
-      var raiseLevel:Boolean = true;
-      for ( i = level.widthInTiles * this.lavaLevel - level.widthInTiles; i < level.widthInTiles * this.lavaLevel; i++ ) {
-        // if this tile is still accessible, don't raise level
-        if ( !this.isLava( this.lava.getTileByIndex( i ) ) && !this.isFloor( this.level.getTileByIndex( i ) ) ) {
-          raiseLevel = false;
-          break;
-        }
-      }
-      if ( raiseLevel ) this.lavaLevel--;
     }
 
     public function updateCollectibles( ):void {
@@ -439,6 +425,33 @@ package
       if ( mode == 0 && ( tile == 21 || tile == 22 ) ) return true;
       if ( mode == 1 && ( tile == 21 ) ) return true;
       if ( mode == 2 && ( tile == 22 ) ) return true;
+      return false;
+    }
+    
+    // recursive function to check wether a lava could go deeper
+    public function couldFall( i:int, direction:String = 'both' ):Boolean {
+
+      // determine left, right, bottom
+      var thisTileLava:int;
+      var bottom:int, bottomTileLava:int, bottomTileLevel:int;
+      var left:int, leftTileLava:int, leftTileLevel:int;
+      var right:int, rightTileLava:int, rightTileLevel:int;
+      
+      thisTileLava = this.lava.getTileByIndex( i );
+      bottom = i + level.widthInTiles; bottomTileLava = this.lava.getTileByIndex( bottom ); bottomTileLevel = this.level.getTileByIndex( bottom );
+      left = ( i % level.widthInTiles == 0 )? -1 : i - 1; leftTileLava = this.lava.getTileByIndex( left ); leftTileLevel = this.level.getTileByIndex( left );
+      right = ( (i + 1) % level.widthInTiles == 0 )? -1: i + 1; rightTileLava = this.lava.getTileByIndex( right ); rightTileLevel = this.level.getTileByIndex( right );
+      
+      // if bottom is free, return true
+      if ( !this.isFloor( bottomTileLevel ) ) return true;
+      
+      // if left is free, return couldFall( left );
+      if ( ( direction == 'left' || direction == 'both' ) && left != -1 && !this.isFloor( leftTileLevel ) && !this.isLava( leftTileLava, 4 ) ) return this.couldFall( left, 'left' );
+      
+      // if right is free, return couldFall( right );
+      if ( ( direction == 'right' || direction == 'both' ) && right != -1 && !this.isFloor( rightTileLevel ) && !this.isLava( rightTileLava, 4 ) ) return this.couldFall( right, 'right' );
+      
+      // error case; shall never happen
       return false;
     }
 
