@@ -3,7 +3,7 @@ package
   import org.flixel.*;
   public class PlayState extends FlxState
   {
-    [Embed(source = '../assets/graphics/tiles.png')] private var Tiles:Class;
+    [Embed(source = '../assets/graphics/tiles_2.png')] private var Tiles:Class;
     [Embed(source = '../assets/music/LD21.mp3')] private var Music:Class;
 
     public function PlayState()
@@ -16,7 +16,7 @@ package
       Globals.health = Globals.PLAYER_MAX_HEALTH;
       Globals.score = 0;
 
-      var game:Game = new Game( 34, Tiles );
+      var game:Game = new Game( 15, Tiles );
       FlxG.switchState( game );
     }
 

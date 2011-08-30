@@ -33,6 +33,7 @@ package
     private var lavaTimer:Number;
     private var lavaNewTimer:Number;
     private var lavaAnimationTimer:Number;
+    private var spikeAnimationTimer:Array;
 
     private var collectibleAnimationTimer:Number;
 
@@ -68,6 +69,7 @@ package
       level.loadMap( this.getLevel( this.gameLevel ), this.Tiles, Globals.TILE_WIDTH, Globals.TILE_HEIGHT, 0, 1, 1, 21 );
       layerWorld.add( level );
       this.level.setTileProperties( 21, FlxObject.ANY, this.checkWhip ); // for whip action
+      this.level.setTileProperties( Globals.TILES_SPIKES, FlxObject.NONE, this.spikeCollision, null, 4 ); // spikes
 
       // initialize lava system
       this.lavaTimer = 0;
@@ -86,6 +88,9 @@ package
       // initialize collectibles
       this.initializeCollectibles( );
 
+      // initialize spike system
+      this.initializeSpikes( );
+      
       this.add( layerBackground );
       this.add( layerWorld );
       this.add( layerObjects );
@@ -128,6 +133,9 @@ package
         this.updateCollectibles( );
         this.collectibleAnimationTimer = 0;
       }
+      
+      // update spikes
+      this.updateSpikes( );
 
       // collide player with level
       FlxG.collide( this.level, this.player );
@@ -190,6 +198,7 @@ package
         case 12: return FlxTilemap.arrayToCSV( Levels.level12( ), 50 ); break;
         case 13: return FlxTilemap.arrayToCSV( Levels.level13( ), 5 ); break;
         case 14: return FlxTilemap.arrayToCSV( Levels.level14( ), 60 ); break;
+        case 15: return FlxTilemap.arrayToCSV( Levels.level15( ), 20 ); break;
         
         case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
         case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
@@ -239,6 +248,14 @@ package
         }
       }
     }
+    
+    public function initializeSpikes( ):void {
+      
+      this.spikeAnimationTimer = new Array( this.level.widthInTiles * this.level.heightInTiles );
+      for ( var i:int = 0; i < this.level.widthInTiles * this.level.heightInTiles; i++ ) {
+        this.spikeAnimationTimer[ i ] = -1;
+      }
+    }
 
     // updates advancing lava doom
     public function updateLava( ):void {
@@ -251,19 +268,6 @@ package
 
       var doAnimate:Boolean = false;
       if ( this.lavaAnimationTimer > Globals.GAME_LAVA_ANIMATION_SPEED ) doAnimate = true;
-
-      /*
-      // advance lava movement
-        // if bottom is free, fall down
-        // else if free flow (by tick: left-right-left-right....)
-        // else harden
-        
-       // correct animation
-        // if bottom free, make it falling
-        // else if not hardened and left free, make it left flowing
-        // else if not hardened and right free, make it right flowing
-        // if leftmost or rightmost and !couldFall, make it hardened
-      */
       
       // advance in movement
       // all lava does one step down if downtile is no floor; thus crushes items and all
@@ -400,6 +404,34 @@ package
         }
       }
     }
+    
+    // spike update method
+    public function updateSpikes( ):void {
+      
+      // update animation timer
+      for ( var i:int = 0; i < this.spikeAnimationTimer.length; i++ ) {
+        if ( this.spikeAnimationTimer[ i ] >= 0 ) {
+          this.spikeAnimationTimer[ i ] += FlxG.elapsed;
+          
+          // second animation phase
+          if ( this.spikeAnimationTimer[ i ] > Globals.GAME_SPIKE_ANIMATION_SPEED ) this.level.setTileByIndex( i, 42 );
+          
+          // third animation phase
+          if ( this.spikeAnimationTimer[ i ] > 2 * Globals.GAME_SPIKE_ANIMATION_SPEED ) this.level.setTileByIndex( i, 43 );
+          
+          // remove spike after duration
+          if ( this.spikeAnimationTimer[ i ] > Globals.GAME_SPIKE_DURATION ) {
+            this.level.setTileByIndex( i, 40 );
+            
+            this.spikeAnimationTimer[ i ] = -1;
+          }
+        }
+        
+        
+      }
+      
+      // spike removal after timeout
+    }
 
     // helper functions
     // mode = 0 -> all lava
@@ -456,7 +488,7 @@ package
     }
 
     public function lavaCollision( tile:FlxTile, obj:FlxObject ):void {
-      //trace( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) );
+
       // hurt collision with lava
       if( !this.player.flickering && Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 ) { // tilemap collision hack on right side of player
         FlxG.play( Globals.SoundHurt, 0.5 )
@@ -478,6 +510,19 @@ package
       FlxG.play( Globals.SoundCoin, 0.5 );
       this.lava.setTileByIndex( tile.mapIndex, 0 );
       Globals.health++;
+    }
+    
+    public function spikeCollision( tile:FlxTile, obj:FlxObject ):void {
+      
+      // add new spike timer
+      if( tile.index == 40 ) { 
+        
+        this.level.setTileByIndex( tile.mapIndex, 41 );
+        this.spikeAnimationTimer[ tile.mapIndex ] = 0;
+      }
+      
+      // hurt handling
+      this.lavaCollision( tile, obj );
     }
 
     public function checkWhip( tile:FlxTile, obj:FlxObject ):void {

@@ -27,12 +27,13 @@ package
     public static const GAME_COLLECTIBLE_ANIMATION_SPEED:Number = 0.5; // animation speed of collectibles
     public static const GAME_LOST_LIFE_LOSE_SCORE:int = 10; // lose this amount of score when dying
     public static const GAME_HIT_LAVA_LOSE_SCORE:int = 2; // lose this amount of score when hitting lavas
+    public static const GAME_SPIKE_ANIMATION_SPEED:Number = 0.025; // animation speed for appearing spikes
+    public static const GAME_SPIKE_DURATION:Number = 3; // duration of appeared spikes
     public static const PLAYER_SPEED:int = 150; // 150 (120 for slower but still okay)
     public static const PLAYER_JUMP:int = 800; // 800
     public static const PLAYER_JUMP_MAX:Number = 0.25; // 0.25
     public static const PLAYER_JUMP_MIN:Number = 0.0625; // 0.0625
     public static const PLAYER_MAX_HEALTH:int =  15; // 15
-
     public static const PLAYER_WHIP_DURATION:Number = 1; // seconds the whip is on
 
     // special tiles
@@ -43,6 +44,7 @@ package
     public static const TILES_LAVA_SOURCE:int = 23;
     public static const TILES_COLLECTIBLE_INDICATOR:int = 10;
     public static const TILES_HEART_INDICATOR:int = 36;
+    public static const TILES_SPIKES:int = 40; // TODO: draw spikes (3 states for smooth movement)
 
     // helper functions
     public static function randomNumber( max:int, min:int = 0 ):int {
