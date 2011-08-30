@@ -29,7 +29,9 @@ package
     public static const GAME_HIT_LAVA_LOSE_SCORE:int = 2; // lose this amount of score when hitting lavas
     public static const GAME_SPIKE_ANIMATION_SPEED:Number = 0.025; // animation speed for appearing spikes
     public static const GAME_SPIKE_DURATION:Number = 3; // duration of appeared spikes
-    public static const PLAYER_SPEED:int = 150; // 150 (120 for slower but still okay)
+    public static const GAME_SHAKE_MAX_TIMER:Number = 15; // shake screen every x seconds
+    public static const GAME_SHAKE_CHANCE:Number = 20; // permillion chance of shaking earlier
+    public static const PLAYER_SPEED:int = 110; // 150 (120 for slower but still okay)
     public static const PLAYER_JUMP:int = 800; // 800
     public static const PLAYER_JUMP_MAX:Number = 0.25; // 0.25
     public static const PLAYER_JUMP_MIN:Number = 0.0625; // 0.0625

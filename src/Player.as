@@ -39,6 +39,7 @@ package
       addAnimation( 'jump_right', [6] );
       addAnimation( 'jump_left', [7] );
       addAnimation( 'jump_center', [8] );
+      addAnimation( 'dying_blood', [43, 44, 45], 10 );
       jump = 0;
       play( 'idle' );
 
@@ -87,7 +88,7 @@ package
 
         if ( jump < Globals.PLAYER_JUMP_MIN ) velocity.y = -Globals.PLAYER_JUMP;
       } else if( !isTouching( FlxObject.FLOOR ) ) {
-        velocity.y = Globals.GAME_GRAVITY;
+        velocity.y += Globals.GAME_GRAVITY;
       }
 
       if ( isTouching( FlxObject.FLOOR ) ) {

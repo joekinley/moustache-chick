@@ -34,6 +34,7 @@ package
     private var lavaNewTimer:Number;
     private var lavaAnimationTimer:Number;
     private var spikeAnimationTimer:Array;
+    private var shakeTimer:Number;
 
     private var collectibleAnimationTimer:Number;
 
@@ -76,6 +77,7 @@ package
       this.lavaNewTimer = 0;
       this.lavaAnimationTimer = 0;
       this.collectibleAnimationTimer = 0;
+      this.shakeTimer = 0;
 
       // initialize player
       var startPoint:FlxPoint = level.getTileCoords( Globals.TILES_PLAYER_START, false )[ 0 ];
@@ -123,12 +125,15 @@ package
       this.lavaAnimationTimer += FlxG.elapsed;
       this.collectibleAnimationTimer += FlxG.elapsed;
       this.whipTimer += FlxG.elapsed;
+      this.shakeTimer += FlxG.elapsed;
 
+      // lava updating mechanism
       if( this.lavaNewTimer > Globals.GAME_LAVA_SPEED ) {
         this.updateLava( );
         this.lavaNewTimer = 0;
       }
 
+      // collectibme animation
       if ( this.collectibleAnimationTimer > Globals.GAME_COLLECTIBLE_ANIMATION_SPEED ) {
         this.updateCollectibles( );
         this.collectibleAnimationTimer = 0;
@@ -136,6 +141,11 @@ package
       
       // update spikes
       this.updateSpikes( );
+      
+      if ( this.shakeTimer > Globals.GAME_SHAKE_MAX_TIMER || Math.random( ) * 10000 < Globals.GAME_SHAKE_CHANCE ) {
+        FlxG.shake( 0.02 );
+        this.shakeTimer = 0;
+      }
 
       // collide player with level
       FlxG.collide( this.level, this.player );
@@ -493,7 +503,10 @@ package
       if( !this.player.flickering && Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 ) { // tilemap collision hack on right side of player
         FlxG.play( Globals.SoundHurt, 0.5 )
         this.player.flicker( 3 );
-        Globals.health--;
+        
+        // collision with spikes makes the player dead immediately
+        if ( tile.index == 41 || tile.index == 42 || tile.index == 43 ) Globals.health = 0; 
+        else Globals.health--; // lava just takes health
         Globals.score -= Globals.GAME_HIT_LAVA_LOSE_SCORE;
       }
     }
