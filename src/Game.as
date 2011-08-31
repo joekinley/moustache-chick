@@ -35,6 +35,7 @@ package
     private var lavaAnimationTimer:Number;
     private var spikeAnimationTimer:Array;
     private var shakeTimer:Number;
+    private var dieTimer:Number;
 
     private var collectibleAnimationTimer:Number;
 
@@ -52,6 +53,8 @@ package
 
     override public function create( ):void {
 
+      Globals.health = Globals.PLAYER_START_HEALTH;
+      
       // initialize layers
       layerWorld = new FlxGroup;
       layerObjects = new FlxGroup;
@@ -78,6 +81,7 @@ package
       this.lavaAnimationTimer = 0;
       this.collectibleAnimationTimer = 0;
       this.shakeTimer = 0;
+      this.dieTimer = 0;
 
       // initialize player
       var startPoint:FlxPoint = level.getTileCoords( Globals.TILES_PLAYER_START, false )[ 0 ];
@@ -133,7 +137,7 @@ package
         this.lavaNewTimer = 0;
       }
 
-      // collectibme animation
+      // collectible animation
       if ( this.collectibleAnimationTimer > Globals.GAME_COLLECTIBLE_ANIMATION_SPEED ) {
         this.updateCollectibles( );
         this.collectibleAnimationTimer = 0;
@@ -154,6 +158,7 @@ package
 
       // check for win condition
       if ( this.level.getTile( this.player.x/Globals.TILE_WIDTH, this.player.y/Globals.TILE_HEIGHT ) == Globals.TILES_EXIT ) {
+        Globals.deathCounter = 0;
         var newLevel:Game = new Game( this.gameLevel + 1, Tiles );
         FlxG.switchState( newLevel );
       }
@@ -176,11 +181,17 @@ package
 
       // loose condition
       if ( Globals.health <= 0 || !this.player.onScreen( ) ) {
-        //FlxG.switchState( new MenuState );
-        Globals.score -= Globals.GAME_LOST_LIFE_LOSE_SCORE;
-        Globals.health = Globals.PLAYER_MAX_HEALTH;
-        var thisLevel:Game = new Game( this.gameLevel, Tiles );
-        FlxG.switchState( thisLevel );
+        
+        this.dieTimer += FlxG.elapsed;
+        this.player.die( );
+        
+        if( this.dieTimer > Globals.GAME_DIE_TIME && this.player.dead && this.player.finished ) {
+          Globals.score -= Globals.GAME_LOST_LIFE_LOSE_SCORE;
+          Globals.health = Globals.PLAYER_START_HEALTH;
+          Globals.deathCounter++;
+          var thisLevel:Game = new Game( this.gameLevel, Tiles );
+          FlxG.switchState( thisLevel );
+        }
       }
 
       // no negative score
@@ -248,13 +259,43 @@ package
 
     public function initializeCollectibles( ):void {
 
-      for ( var i:int = 0; i < level.widthInTiles * level.heightInTiles; i++ ) {
+      var startIndex:int, heartsPlaced:int = 0, itteration:int = 0, i:int;
+      
+      for ( i = 0; i < level.widthInTiles * level.heightInTiles; i++ ) {
         if ( this.level.getTileByIndex( i ) == Globals.TILES_COLLECTIBLE_INDICATOR ) {
           this.lava.setTileByIndex( i, 19 );
           this.level.setTileByIndex( i, 0 );
         } else if ( this.level.getTileByIndex( i ) == Globals.TILES_HEART_INDICATOR ) {
           this.lava.setTileByIndex( i, 33 );
           this.level.setTileByIndex( i, 0 );
+        }
+        if ( this.level.getTileByIndex( i ) == Globals.TILES_PLAYER_START ) startIndex = i;
+      }
+      
+      // start placing as many hearts as Globals.deathCounter
+      // start left, then go in circles around the player
+      var leftmost:int, rightmost:int, topmost:int;
+      while ( heartsPlaced < Globals.deathCounter ) {
+        itteration++; leftmost = startIndex; rightmost = startIndex; topmost = startIndex;
+        
+        while( leftmost % this.lava.widthInTiles != 0 && leftmost > startIndex - itteration ) leftmost--;
+        while( rightmost + 1 % this.lava.widthInTiles != 0 && rightmost < startIndex + itteration ) rightmost++;
+        while( topmost > this.lava.widthInTiles && topmost > startIndex - itteration * this.lava.widthInTiles ) topmost -= this.lava.widthInTiles;
+
+        // set the hearts
+        if ( leftmost != startIndex && heartsPlaced < Globals.deathCounter && this.lava.getTileByIndex( leftmost ) == 0 && !this.isFloor( this.level.getTileByIndex( leftmost ) ) ) {
+          this.lava.setTileByIndex( leftmost, 33 );
+          heartsPlaced++;
+        }
+        if ( rightmost != startIndex && heartsPlaced < Globals.deathCounter && this.lava.getTileByIndex( rightmost ) == 0 && !this.isFloor( this.level.getTileByIndex( rightmost ) ) ) {
+           this.lava.setTileByIndex( rightmost, 33 );
+           heartsPlaced++;
+        }
+        for ( i = topmost - ( startIndex - leftmost ); i < topmost + ( rightmost - startIndex ); i++ ) {
+          if ( i != startIndex && heartsPlaced < Globals.deathCounter && this.lava.getTileByIndex( i ) == 0 && !this.isFloor( this.level.getTileByIndex( i ) ) ) {
+            this.lava.setTileByIndex( i, 33 );
+            heartsPlaced++;
+          }
         }
       }
     }
@@ -466,7 +507,7 @@ package
 
       if ( mode == 0 && ( tile == 21 || tile == 22 ) ) return true;
       if ( mode == 1 && ( tile == 21 ) ) return true;
-      if ( mode == 2 && ( tile == 22 ) ) return true;
+      if ( mode == 2 && ( tile == 22 || tile == 23 ) ) return true;
       return false;
     }
     
@@ -500,9 +541,9 @@ package
     public function lavaCollision( tile:FlxTile, obj:FlxObject ):void {
 
       // hurt collision with lava
-      if( !this.player.flickering && Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 ) { // tilemap collision hack on right side of player
+      if( !this.player.dead && !this.player.flickering && Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 ) { // tilemap collision hack on right side of player
         FlxG.play( Globals.SoundHurt, 0.5 )
-        this.player.flicker( 3 );
+        if( Globals.health > 0 ) this.player.flicker( 3 );
         
         // collision with spikes makes the player dead immediately
         if ( tile.index == 41 || tile.index == 42 || tile.index == 43 ) Globals.health = 0; 

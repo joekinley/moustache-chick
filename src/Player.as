@@ -12,11 +12,13 @@ package
     private var jump:Number;
     private var whip:Boolean;
     public var facingDir:String;
+    public var dead:Boolean;
 
     public var whipSprite:FlxSprite;
 
     public function Player( mySprites:Class )
     {
+      this.dead = false;
       this.Sprites = mySprites;
       loadGraphic( Sprites, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
 
@@ -39,7 +41,8 @@ package
       addAnimation( 'jump_right', [6] );
       addAnimation( 'jump_left', [7] );
       addAnimation( 'jump_center', [8] );
-      addAnimation( 'dying_blood', [43, 44, 45], 10 );
+      addAnimation( 'dying_blood', [43, 44, 45, 0], 10, false );
+      
       jump = 0;
       play( 'idle' );
 
@@ -54,64 +57,66 @@ package
 
     override public function update( ):void {
       
-      velocity.x = 0;
-      //facingDir = 'center';
-      whipSprite.play( 'up' );
+        if( !this.dead ) {
+        velocity.x = 0;
+        //facingDir = 'center';
+        whipSprite.play( 'up' );
 
-      if ( FlxG.keys.LEFT ) {
-        velocity.x = -Globals.PLAYER_SPEED;
-        facingDir = 'left';
-        play( 'run_left' );
-        whipSprite.play( 'left' );
-      }
-      if ( FlxG.keys.RIGHT ) {
-        velocity.x = Globals.PLAYER_SPEED;
-        facingDir = 'right';
-        play( 'run_right' );
-        whipSprite.play( 'right' );
-      }
+        if ( FlxG.keys.LEFT ) {
+          velocity.x = -Globals.PLAYER_SPEED;
+          facingDir = 'left';
+          play( 'run_left' );
+          whipSprite.play( 'left' );
+        }
+        if ( FlxG.keys.RIGHT ) {
+          velocity.x = Globals.PLAYER_SPEED;
+          facingDir = 'right';
+          play( 'run_right' );
+          whipSprite.play( 'right' );
+        }
 
-      // play jump sound
-      if( FlxG.keys.justPressed( 'UP' ) ) FlxG.play( Globals.SoundJump, 0.5 );
+        // play jump sound
+        if( FlxG.keys.justPressed( 'UP' ) ) FlxG.play( Globals.SoundJump, 0.5 );
 
-      // mario style jump mechanic
-      if ( FlxG.keys.UP && jump >= 0 ) {
-        jump += FlxG.elapsed;
-        if ( jump > Globals.PLAYER_JUMP_MAX ) jump = -1;
+        // mario style jump mechanic
+        if ( FlxG.keys.UP && jump >= 0 ) {
+          jump += FlxG.elapsed;
+          if ( jump > Globals.PLAYER_JUMP_MAX ) jump = -1;
 
-      } else jump = -1;
+        } else jump = -1;
 
-      if ( jump > 0 ) {
-        if ( facingDir == 'left' ) play( 'jump_left' );
-        else if ( facingDir == 'right' ) play( 'jump_right' );
-        else play( 'jump_center' );
+        if ( jump > 0 ) {
+          if ( facingDir == 'left' ) play( 'jump_left' );
+          else if ( facingDir == 'right' ) play( 'jump_right' );
+          else play( 'jump_center' );
 
-        if ( jump < Globals.PLAYER_JUMP_MIN ) velocity.y = -Globals.PLAYER_JUMP;
-      } else if( !isTouching( FlxObject.FLOOR ) ) {
-        velocity.y += Globals.GAME_GRAVITY;
-      }
+          if ( jump < Globals.PLAYER_JUMP_MIN ) velocity.y = -Globals.PLAYER_JUMP;
+        } else if( !isTouching( FlxObject.FLOOR ) ) {
+          velocity.y += Globals.GAME_GRAVITY;
+        }
 
-      if ( isTouching( FlxObject.FLOOR ) ) {
-        jump = 0;
-      }
+        if ( isTouching( FlxObject.FLOOR ) ) {
+          jump = 0;
+        }
 
-      if ( velocity.x == 0 && jump <= 0 ) {
-        if ( facingDir == 'left' ) play( 'idle_left' );
-        else if ( facingDir == 'right' ) play( 'idle_right' );
-        else play( 'idle' );
-      }
+        if ( velocity.x == 0 && jump <= 0 ) {
+          if ( facingDir == 'left' ) play( 'idle_left' );
+          else if ( facingDir == 'right' ) play( 'idle_right' );
+          else play( 'idle' );
+        }
 
-      // also show whip sprite
-      if ( this.whip ) {
-        if( velocity.x < 0 ) {
-          whipSprite.x = this.x - this.width;
-          whipSprite.y = this.y;
-        } else if ( velocity.x > 0 ) {
-          whipSprite.x = this.x + this.width;
-          whipSprite.y = this.y;
-        } else {
-          whipSprite.x = this.x;
-          whipSprite.y = this.y - this.height;
+        // also show whip sprite
+        if ( this.whip ) {
+          if( velocity.x < 0 ) {
+            whipSprite.x = this.x - this.width;
+            whipSprite.y = this.y;
+          } else if ( velocity.x > 0 ) {
+            whipSprite.x = this.x + this.width;
+            whipSprite.y = this.y;
+          } else {
+            whipSprite.x = this.x;
+            whipSprite.y = this.y - this.height;
+          }
         }
       }
 
@@ -122,6 +127,19 @@ package
       this.whip = status;
       if ( status ) this.whipSprite.revive( );
       else this.whipSprite.kill( );
+    }
+    
+    public function die( ):void {
+      if ( !this.dead ) {
+        this.velocity.x = 0;
+        this.velocity.y = 0;
+        this.acceleration.x = 0;
+        this.acceleration.y = 0;
+        this._flicker = false;
+        this._flickerTimer = 0;
+        this.dead = true;
+        play( 'dying_blood' );
+      }
     }
   }
 

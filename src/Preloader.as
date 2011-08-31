@@ -13,7 +13,7 @@ package
 		{
 			className = 'LD21';
       super( );
-      minDisplayTime = 4;
+      //minDisplayTime = 4;
 		}
 		
 		

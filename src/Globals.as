@@ -31,11 +31,12 @@ package
     public static const GAME_SPIKE_DURATION:Number = 3; // duration of appeared spikes
     public static const GAME_SHAKE_MAX_TIMER:Number = 15; // shake screen every x seconds
     public static const GAME_SHAKE_CHANCE:Number = 20; // permillion chance of shaking earlier
+    public static const GAME_DIE_TIME:Number = 3; // seconds after dying before restarting the level
     public static const PLAYER_SPEED:int = 110; // 150 (120 for slower but still okay)
     public static const PLAYER_JUMP:int = 800; // 800
     public static const PLAYER_JUMP_MAX:Number = 0.25; // 0.25
     public static const PLAYER_JUMP_MIN:Number = 0.0625; // 0.0625
-    public static const PLAYER_MAX_HEALTH:int =  15; // 15
+    public static const PLAYER_START_HEALTH:int =  1; // player starts with this amount of health
     public static const PLAYER_WHIP_DURATION:Number = 1; // seconds the whip is on
 
     // special tiles
@@ -53,6 +54,7 @@ package
       return Math.random( ) * ( max - min ) + min;
     }
 
+    public static var deathCounter:int = 0;
     public static var score:int = 0;
     public static var health:int = 0;
     public static var hasWhip:Boolean = false;
