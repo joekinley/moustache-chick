@@ -43,6 +43,7 @@ package
     private var health:FlxText;
     private var isWhipping:Boolean
     private var whipTimer:Number;
+    private var gameScore:int;
 
     public function Game( number:int, tileset:Class )
     {
@@ -54,6 +55,7 @@ package
     override public function create( ):void {
 
       Globals.health = Globals.PLAYER_START_HEALTH;
+      this.gameScore = 0;
       
       // initialize layers
       layerWorld = new FlxGroup;
@@ -186,6 +188,7 @@ package
         this.player.die( );
         
         if( this.dieTimer > Globals.GAME_DIE_TIME && this.player.dead && this.player.finished ) {
+          Globals.score -= this.gameScore;
           Globals.score -= Globals.GAME_LOST_LIFE_LOSE_SCORE;
           Globals.health = Globals.PLAYER_START_HEALTH;
           Globals.deathCounter++;
@@ -204,6 +207,7 @@ package
 
       switch( number ) {
         case -1: return FlxTilemap.arrayToCSV( Levels.level01( ), 8 ); break;
+        // easy levels
         case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 10 ); break;
         case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 ); break;
         case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 15 ); break;
@@ -212,14 +216,16 @@ package
         case 5: return FlxTilemap.arrayToCSV( Levels.level5( ), 10 ); break;
         case 6: return FlxTilemap.arrayToCSV( Levels.level6( ), 16 ); break;
         case 7: return FlxTilemap.arrayToCSV( Levels.level7( ), 19 ); break;
-        case 8: return FlxTilemap.arrayToCSV( Levels.level8( ), 64 ); break;
+        case 8: return FlxTilemap.arrayToCSV( Levels.level8( ), 65 ); break;
         case 9: return FlxTilemap.arrayToCSV( Levels.level9( ), 6 ); break;
         case 10: return FlxTilemap.arrayToCSV( Levels.level10( ), 25 ); break;
         case 11: return FlxTilemap.arrayToCSV( Levels.level11( ), 30 ); break;
         case 12: return FlxTilemap.arrayToCSV( Levels.level12( ), 50 ); break;
         case 13: return FlxTilemap.arrayToCSV( Levels.level13( ), 5 ); break;
         case 14: return FlxTilemap.arrayToCSV( Levels.level14( ), 60 ); break;
+        // medium levels
         case 15: return FlxTilemap.arrayToCSV( Levels.level15( ), 20 ); break;
+        case 16: return FlxTilemap.arrayToCSV( Levels.level16( ), 20 ); break;
         
         case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
         case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
@@ -546,8 +552,7 @@ package
         if( Globals.health > 0 ) this.player.flicker( 3 );
         
         // collision with spikes makes the player dead immediately
-        if ( tile.index == 41 || tile.index == 42 || tile.index == 43 ) Globals.health = 0; 
-        else Globals.health--; // lava just takes health
+        Globals.health--; // lava just takes health
         Globals.score -= Globals.GAME_HIT_LAVA_LOSE_SCORE;
       }
     }
@@ -557,6 +562,7 @@ package
       FlxG.play( Globals.SoundCoin, 0.5 );
       this.lava.setTileByIndex( tile.mapIndex, 0 );
       Globals.score++;
+      this.gameScore++;
     }
 
     public function heartCollision( tile:FlxTile, obj:FlxObject ):void {
@@ -574,9 +580,18 @@ package
         this.level.setTileByIndex( tile.mapIndex, 41 );
         this.spikeAnimationTimer[ tile.mapIndex ] = 0;
       }
-      
+//trace( ( tile.mapIndex / this.lava.widthInTiles ) * Globals.TILE_HEIGHT, obj.y );      
       // hurt handling
-      this.lavaCollision( tile, obj );
+      // hurt collision with spikes
+      if ( !this.player.dead 
+       && ( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 )
+       /*&& ( Math.abs( ( tile.mapIndex / this.lava.heightInTiles ) * Globals.TILE_HEIGHT - obj.y ) < 12 ) */ ) { // tilemap collision hack on right side of player
+        FlxG.play( Globals.SoundHurt, 0.5 )
+        if( Globals.health > 0 ) this.player.flicker( 3 );
+        
+        // collision with spikes makes the player dead immediately
+        Globals.health = 0; 
+      }
     }
 
     public function checkWhip( tile:FlxTile, obj:FlxObject ):void {
@@ -596,6 +611,11 @@ package
     public function debug( ):void {
 
       if ( FlxG.keys.justPressed( 'P' ) ) Globals.health++;
+      if ( FlxG.keys.justPressed( 'O' ) ) {
+        Globals.deathCounter = 0;
+        var newLevel:Game = new Game( this.gameLevel + 1, Tiles );
+        FlxG.switchState( newLevel );
+      }
     }
   }
 }

@@ -32,9 +32,10 @@ package
     public static const GAME_SHAKE_MAX_TIMER:Number = 15; // shake screen every x seconds
     public static const GAME_SHAKE_CHANCE:Number = 20; // permillion chance of shaking earlier
     public static const GAME_DIE_TIME:Number = 3; // seconds after dying before restarting the level
-    public static const PLAYER_SPEED:int = 110; // 150 (120 for slower but still okay)
-    public static const PLAYER_JUMP:int = 800; // 800
-    public static const PLAYER_JUMP_MAX:Number = 0.25; // 0.25
+    public static const PLAYER_SPEED:int = 125; // 150 (120 for slower but still okay)
+    public static const PLAYER_SPEED_JUMP:int = 180; // 150 jump speed is faster
+    public static const PLAYER_JUMP:int = 700; // 800
+    public static const PLAYER_JUMP_MAX:Number = 0.30; // 0.25
     public static const PLAYER_JUMP_MIN:Number = 0.0625; // 0.0625
     public static const PLAYER_START_HEALTH:int =  1; // player starts with this amount of health
     public static const PLAYER_WHIP_DURATION:Number = 1; // seconds the whip is on

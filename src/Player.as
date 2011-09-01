@@ -63,13 +63,15 @@ package
         whipSprite.play( 'up' );
 
         if ( FlxG.keys.LEFT ) {
-          velocity.x = -Globals.PLAYER_SPEED;
+          if ( jump > 0 ) velocity.x = -Globals.PLAYER_SPEED_JUMP;
+          else velocity.x = -Globals.PLAYER_SPEED;
           facingDir = 'left';
           play( 'run_left' );
           whipSprite.play( 'left' );
         }
         if ( FlxG.keys.RIGHT ) {
-          velocity.x = Globals.PLAYER_SPEED;
+          if ( jump > 0 ) velocity.x = Globals.PLAYER_SPEED_JUMP;
+          else velocity.x = Globals.PLAYER_SPEED;
           facingDir = 'right';
           play( 'run_right' );
           whipSprite.play( 'right' );

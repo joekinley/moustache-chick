@@ -22,6 +22,14 @@ package
       var text2:FlxText = new FlxText( 90, 150, 190, '[a] for whip, after Level "The End" for breaking floors' );
       add( text2 );
 		}
+    
+    override public function update( ):void {
+      if ( FlxG.keys.any( ) ) {
+        this.startGame( );
+      }
+      super.update( );
+    }
+    
 		private function startGame():void
 		{
 			FlxG.mouse.hide();
