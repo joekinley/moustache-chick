@@ -4,6 +4,7 @@ package
    * ...
    * @author Rafael Wenzel
    */
+  import org.flixel.FlxTileblock;
   import org.flixel.FlxTilemap;
   import org.flixel.FlxState;
   import org.flixel.FlxGroup;
@@ -76,6 +77,8 @@ package
       layerWorld.add( level );
       this.level.setTileProperties( 21, FlxObject.ANY, this.checkWhip ); // for whip action
       this.level.setTileProperties( Globals.TILES_SPIKES, FlxObject.NONE, this.spikeCollision, null, 4 ); // spikes
+      this.level.setTileProperties( 47, FlxObject.NONE, this.ladderCollision, Player, 2 );
+      this.level.setTileProperties( 49, FlxObject.LEFT | FlxObject.RIGHT | FlxObject.CEILING, this.ladderCollision );
 
       // initialize lava system
       this.lavaTimer = 0;
@@ -230,7 +233,7 @@ package
         case 18: return FlxTilemap.arrayToCSV( Levels.level18( ), 20 ); break;
         case 19: return FlxTilemap.arrayToCSV( Levels.level19( ), 80 ); break;
         case 20: return FlxTilemap.arrayToCSV( Levels.level20( ), 30 ); break;
-        
+        case 21: return FlxTilemap.arrayToCSV( Levels.level21( ), 20 ); break;
         
         case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
         case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
@@ -596,6 +599,12 @@ package
         
         // collision with spikes makes the player dead immediately
         Globals.health = 0; 
+      }
+    }
+    
+    public function ladderCollision( tile:FlxTile, plr:Player ):void {
+      if( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - plr.x ) < 10 ) {
+        plr.isTouchingLadder( true );
       }
     }
 

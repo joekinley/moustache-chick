@@ -13,11 +13,15 @@ package
     private var whip:Boolean;
     public var facingDir:String;
     public var dead:Boolean;
+    private var touchingLadder:Boolean;
+    private var holdingLadder:Boolean;
 
     public var whipSprite:FlxSprite;
 
     public function Player( mySprites:Class )
     {
+      this.touchingLadder = false;
+      this.holdingLadder = false;
       this.dead = false;
       this.Sprites = mySprites;
       loadGraphic( Sprites, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
@@ -57,55 +61,21 @@ package
 
     override public function update( ):void {
       
-        if( !this.dead ) {
+      if( !this.dead ) {
         velocity.x = 0;
         //facingDir = 'center';
         whipSprite.play( 'up' );
 
-        if ( FlxG.keys.LEFT ) {
-          if ( jump > 0 ) velocity.x = -Globals.PLAYER_SPEED_JUMP;
-          else velocity.x = -Globals.PLAYER_SPEED;
-          facingDir = 'left';
-          play( 'run_left' );
-          whipSprite.play( 'left' );
-        }
-        if ( FlxG.keys.RIGHT ) {
-          if ( jump > 0 ) velocity.x = Globals.PLAYER_SPEED_JUMP;
-          else velocity.x = Globals.PLAYER_SPEED;
-          facingDir = 'right';
-          play( 'run_right' );
-          whipSprite.play( 'right' );
-        }
+        // movement left and right
+        this.handleMovement( );
 
-        // play jump sound
-        if( FlxG.keys.justPressed( 'UP' ) ) FlxG.play( Globals.SoundJump, 0.5 );
+        // jumping
+        this.handleJump( );
+        
+        // ladder mechanisn
+        this.handleLadder( );
 
-        // mario style jump mechanic
-        if ( FlxG.keys.UP && jump >= 0 ) {
-          jump += FlxG.elapsed;
-          if ( jump > Globals.PLAYER_JUMP_MAX ) jump = -1;
-
-        } else jump = -1;
-
-        if ( jump > 0 ) {
-          if ( facingDir == 'left' ) play( 'jump_left' );
-          else if ( facingDir == 'right' ) play( 'jump_right' );
-          else play( 'jump_center' );
-
-          if ( jump < Globals.PLAYER_JUMP_MIN ) velocity.y = -Globals.PLAYER_JUMP;
-        } else if( !isTouching( FlxObject.FLOOR ) ) {
-          velocity.y += Globals.GAME_GRAVITY;
-        }
-
-        if ( isTouching( FlxObject.FLOOR ) ) {
-          jump = 0;
-        }
-
-        if ( velocity.x == 0 && jump <= 0 ) {
-          if ( facingDir == 'left' ) play( 'idle_left' );
-          else if ( facingDir == 'right' ) play( 'idle_right' );
-          else play( 'idle' );
-        }
+        this.handleAnimation( );
 
         // also show whip sprite
         if ( this.whip ) {
@@ -120,15 +90,108 @@ package
             whipSprite.y = this.y - this.height;
           }
         }
+        
+        this.isTouchingLadder( false );
       }
-
+      
       super.update( );
+    }
+       
+    public function handleMovement( ):void {
+      
+      if ( FlxG.keys.LEFT ) {
+        if ( jump > 0 ) velocity.x = -Globals.PLAYER_SPEED_JUMP;
+        else velocity.x = -Globals.PLAYER_SPEED;
+        facingDir = 'left';
+        play( 'run_left' );
+        whipSprite.play( 'left' );
+      }
+      if ( FlxG.keys.RIGHT ) {
+        if ( jump > 0 ) velocity.x = Globals.PLAYER_SPEED_JUMP;
+        else velocity.x = Globals.PLAYER_SPEED;
+        facingDir = 'right';
+        play( 'run_right' );
+        whipSprite.play( 'right' );
+      }
+    }
+    
+    public function handleJump( ):void {
+      
+      // play jump sound
+      if( FlxG.keys.justPressed( 'UP' ) ) FlxG.play( Globals.SoundJump, 0.5 );
+
+      // mario style jump mechanic
+      if( !this.holdingLadder ) {
+        if ( FlxG.keys.UP && jump >= 0 ) {
+          jump += FlxG.elapsed;
+          if ( jump > Globals.PLAYER_JUMP_MAX ) jump = -1;
+
+        } else jump = -1;
+
+        if ( jump > 0 ) {
+          if ( facingDir == 'left' /*&& velocity.x > 0*/ ) play( 'jump_left' );
+          else if ( facingDir == 'right' /*&& velocity.x < 0*/ ) play( 'jump_right' );
+          else play( 'jump_center' );
+
+          if ( jump < Globals.PLAYER_JUMP_MIN ) velocity.y = -Globals.PLAYER_JUMP;
+        } else if( !isTouching( FlxObject.FLOOR ) ) {
+          velocity.y += Globals.GAME_GRAVITY;
+        }
+
+        if ( isTouching( FlxObject.FLOOR ) ) {
+          jump = 0;
+        }
+      }
+    }
+    
+    public function handleLadder( ):void {
+      
+      if( this.touchingLadder ) {
+        
+        if ( !this.holdingLadder && FlxG.keys.UP ) { // hang onto ladder
+          // todo: center on ladder sprite      
+          velocity.x = 0;
+          velocity.y = -Globals.PLAYER_SPEED;
+          jump = -1;
+          this.holdingLadder = true;
+          acceleration.y = 0;
+        } else if ( this.holdingLadder && FlxG.keys.UP && ( FlxG.keys.LEFT || FlxG.keys.RIGHT ) ) { // jump off ladder
+          this.holdingLadder = false;
+          jump = 0;
+          acceleration.y = Globals.GAME_GRAVITY;
+        } else if ( this.holdingLadder && FlxG.keys.UP ) {
+          velocity.y = -Globals.PLAYER_SPEED;
+        } else if ( this.holdingLadder && FlxG.keys.DOWN ) {
+          velocity.y = Globals.PLAYER_SPEED;
+        } else if ( !this.holdingLadder && FlxG.keys.DOWN ) {
+          y += 32;
+          this.holdingLadder = true;
+          acceleration.y = 0;
+        }
+      } else {
+        acceleration.y = Globals.GAME_GRAVITY;
+        //jump = 0;
+        this.holdingLadder = false;
+      }
+    }
+    
+    public function handleAnimation( ):void {
+      
+      if ( velocity.x == 0 && jump <= 0 ) {
+        if ( facingDir == 'left' ) play( 'idle_left' );
+        else if ( facingDir == 'right' ) play( 'idle_right' );
+        else play( 'idle' );
+      }
     }
 
     public function setWhipping( status:Boolean = false ):void {
       this.whip = status;
       if ( status ) this.whipSprite.revive( );
       else this.whipSprite.kill( );
+    }
+    
+    public function isTouchingLadder( status:Boolean ):void {
+      this.touchingLadder = status;
     }
     
     public function die( ):void {
