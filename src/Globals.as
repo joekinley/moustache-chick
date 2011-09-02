@@ -31,7 +31,7 @@ package
     public static const GAME_SPIKE_DURATION:Number = 3; // duration of appeared spikes
     public static const GAME_SHAKE_MAX_TIMER:Number = 15; // shake screen every x seconds
     public static const GAME_SHAKE_CHANCE:Number = 20; // permillion chance of shaking earlier
-    public static const GAME_DIE_TIME:Number = 3; // seconds after dying before restarting the level
+    public static const GAME_DIE_TIME:Number = 0.15; // seconds after dying before respawning
     public static const PLAYER_SPEED:int = 125; // 150 (120 for slower but still okay)
     public static const PLAYER_SPEED_JUMP:int = 180; // 150 jump speed is faster
     public static const PLAYER_JUMP:int = 700; // 800

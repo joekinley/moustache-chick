@@ -225,7 +225,12 @@ package
         case 14: return FlxTilemap.arrayToCSV( Levels.level14( ), 60 ); break;
         // medium levels
         case 15: return FlxTilemap.arrayToCSV( Levels.level15( ), 20 ); break;
-        case 16: return FlxTilemap.arrayToCSV( Levels.level16( ), 20 ); break;
+        case 16: return FlxTilemap.arrayToCSV( Levels.level16( ), 10 ); break;
+        case 17: return FlxTilemap.arrayToCSV( Levels.level17( ), 30 ); break;
+        case 18: return FlxTilemap.arrayToCSV( Levels.level18( ), 20 ); break;
+        case 19: return FlxTilemap.arrayToCSV( Levels.level19( ), 80 ); break;
+        case 20: return FlxTilemap.arrayToCSV( Levels.level20( ), 30 ); break;
+        
         
         case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
         case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
