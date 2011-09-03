@@ -603,8 +603,11 @@ package
     }
     
     public function ladderCollision( tile:FlxTile, plr:Player ):void {
+      
+      if ( tile.index == 48 && FlxG.keys.UP && !plr.holdingLadder ) return;
+      
       if( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - plr.x ) < 10 ) {
-        plr.isTouchingLadder( true );
+        plr.isTouchingLadder( true, ( tile.mapIndex % this.level.widthInTiles ) * Globals.TILE_WIDTH );
       }
     }
 

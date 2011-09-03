@@ -14,7 +14,7 @@ package
     public var facingDir:String;
     public var dead:Boolean;
     private var touchingLadder:Boolean;
-    private var holdingLadder:Boolean;
+    public var holdingLadder:Boolean;
 
     public var whipSprite:FlxSprite;
 
@@ -91,7 +91,7 @@ package
           }
         }
         
-        this.isTouchingLadder( false );
+        this.isTouchingLadder( false, x );
       }
       
       super.update( );
@@ -190,7 +190,10 @@ package
       else this.whipSprite.kill( );
     }
     
-    public function isTouchingLadder( status:Boolean ):void {
+    public function isTouchingLadder( status:Boolean, position:int ):void {
+      // only apply position when first holding
+      if ( !touchingLadder && !holdingLadder && FlxG.keys.UP ) x = position;
+      
       this.touchingLadder = status;
     }
     
