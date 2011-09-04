@@ -192,7 +192,7 @@ package
     
     public function isTouchingLadder( status:Boolean, position:int ):void {
       // only apply position when first holding
-      if ( !touchingLadder && !holdingLadder && FlxG.keys.UP ) x = position;
+      if ( status == true && !touchingLadder && !holdingLadder && FlxG.keys.UP ) x = position;
       
       this.touchingLadder = status;
     }

@@ -279,10 +279,10 @@ package
         if ( this.level.getTileByIndex( i ) == Globals.TILES_COLLECTIBLE_INDICATOR ) {
           this.lava.setTileByIndex( i, 19 );
           this.level.setTileByIndex( i, 0 );
-        } else if ( this.level.getTileByIndex( i ) == Globals.TILES_HEART_INDICATOR ) {
+        } /*else if ( this.level.getTileByIndex( i ) == Globals.TILES_HEART_INDICATOR ) {
           this.lava.setTileByIndex( i, 33 );
           this.level.setTileByIndex( i, 0 );
-        }
+        }*/
         if ( this.level.getTileByIndex( i ) == Globals.TILES_PLAYER_START ) startIndex = i;
       }
       
@@ -588,7 +588,6 @@ package
         this.level.setTileByIndex( tile.mapIndex, 41 );
         this.spikeAnimationTimer[ tile.mapIndex ] = 0;
       }
-//trace( ( tile.mapIndex / this.lava.widthInTiles ) * Globals.TILE_HEIGHT, obj.y );      
       // hurt handling
       // hurt collision with spikes
       if ( !this.player.dead 
@@ -604,9 +603,16 @@ package
     
     public function ladderCollision( tile:FlxTile, plr:Player ):void {
       
+      // no going up on top ladder step
       if ( tile.index == 48 && FlxG.keys.UP && !plr.holdingLadder ) return;
       
-      if( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - plr.x ) < 10 ) {
+      // no going further than fist 5 pixels on top ladder step
+      // y = (tile.mapIndex / this.lava.widthInTiles ) * Globals.TILE_HEIGHT
+      //trace( plr.y, (tile.mapIndex / this.lava.widthInTiles ) * Globals.TILE_HEIGHT );
+      if ( plr.holdingLadder && tile.index == 48 && plr.y + 10 < (tile.mapIndex / this.lava.widthInTiles ) * Globals.TILE_HEIGHT ) {
+        plr.isTouchingLadder( false, 0 );
+        plr.holdingLadder = false;
+      } else if( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - plr.x ) < 10 ) {
         plr.isTouchingLadder( true, ( tile.mapIndex % this.level.widthInTiles ) * Globals.TILE_WIDTH );
       }
     }

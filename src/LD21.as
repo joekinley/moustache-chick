@@ -4,9 +4,9 @@ package
   import flash.events.Event;
   import org.flixel.FlxGame;
   import mochi.as3.MochiServices;
-  import mochi.as3.MochiAd;
+  //import mochi.as3.MochiAd;
 
-  [Frame(factoryClass = "Preloader")]
+  //[Frame(factoryClass = "Preloader")]
   
 	public dynamic class LD21 extends FlxGame
 	{
@@ -17,7 +17,7 @@ package
 		}
     
     private function init( e:Event ):void {
-      MochiServices.connect( "a37cee9a5ae400e2", this.parent );
+      //MochiServices.connect( "a37cee9a5ae400e2", this.parent );
     }
 	}
 

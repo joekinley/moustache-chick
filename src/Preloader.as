@@ -4,7 +4,7 @@ package {
     import flash.events.IOErrorEvent;
     import flash.utils.getDefinitionByName;
 
-    import mochi.as3.*;
+    //import mochi.as3.*;
 
     // Must be dynamic!
     public dynamic class Preloader extends MovieClip {
@@ -45,7 +45,7 @@ package {
             opts.clip = this;
             //opts.skip = true;
 
-            MochiAd.showPreGameAd(opts);
+            //MochiAd.showPreGameAd(opts);
         }
 
 
