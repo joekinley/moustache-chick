@@ -32,6 +32,9 @@ package
     public static const GAME_SHAKE_MAX_TIMER:Number = 15; // shake screen every x seconds
     public static const GAME_SHAKE_CHANCE:Number = 20; // permillion chance of shaking earlier
     public static const GAME_DIE_TIME:Number = 0.15; // seconds after dying before respawning
+    public static const GAME_SPEAR_SPEED:int = 300; // speed of a spear
+    public static const GAME_SPEAR_RESPAWN:Number = 1; // seconds until another spear fires
+    public static const GAME_SPEAR_HIT_TIMEOUT:Number = 2; // seconds the player is paralyzed after being hit by speer
     public static const PLAYER_SPEED:int = 125; // 150 (120 for slower but still okay)
     public static const PLAYER_SPEED_JUMP:int = 180; // 150 jump speed is faster
     public static const PLAYER_JUMP:int = 700; // 800

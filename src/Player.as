@@ -15,6 +15,8 @@ package
     public var dead:Boolean;
     private var touchingLadder:Boolean;
     public var holdingLadder:Boolean;
+    public var paralyzed:Boolean;
+    private var paralyzeTimer:Number;
 
     public var whipSprite:FlxSprite;
 
@@ -22,9 +24,11 @@ package
     {
       this.touchingLadder = false;
       this.holdingLadder = false;
+      this.paralyzed = false;
       this.dead = false;
       this.Sprites = mySprites;
       loadGraphic( Sprites, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
+      this.paralyzeTimer = 0;
 
       // correct sprite bounds
       width = 14; // collision box tweak
@@ -61,19 +65,28 @@ package
 
     override public function update( ):void {
       
+      // count paralyze timer
+      if ( this.paralyzed ) this.paralyzeTimer += FlxG.elapsed;
+      if ( this.paralyzeTimer >= Globals.GAME_SPEAR_HIT_TIMEOUT ) {
+        this.paralyzed = false;
+        this.paralyzeTimer = 0;
+      }
+      
       if( !this.dead ) {
         velocity.x = 0;
         //facingDir = 'center';
         whipSprite.play( 'up' );
 
-        // movement left and right
-        this.handleMovement( );
+        if( !this.paralyzed ) {
+          // movement left and right
+          this.handleMovement( );
 
-        // jumping
-        this.handleJump( );
-        
-        // ladder mechanisn
-        this.handleLadder( );
+          // jumping
+          this.handleJump( );
+          
+          // ladder mechanisn
+          this.handleLadder( );
+        }
 
         this.handleAnimation( );
 

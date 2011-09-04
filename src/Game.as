@@ -4,6 +4,7 @@ package
    * ...
    * @author Rafael Wenzel
    */
+  import flash.display.Sprite;
   import org.flixel.FlxTileblock;
   import org.flixel.FlxTilemap;
   import org.flixel.FlxState;
@@ -25,6 +26,7 @@ package
     private var layerWorld:FlxGroup;
     private var lava:FlxTilemap;
     private var layerObjects:FlxGroup;
+    private var layerSpears:FlxGroup;
     private var layerBackground:FlxGroup;
 
     private var game:Game;
@@ -35,6 +37,7 @@ package
     private var lavaNewTimer:Number;
     private var lavaAnimationTimer:Number;
     private var spikeAnimationTimer:Array;
+    private var spearAnimationTimer:Array;
     private var shakeTimer:Number;
     private var dieTimer:Number;
 
@@ -61,6 +64,7 @@ package
       // initialize layers
       layerWorld = new FlxGroup;
       layerObjects = new FlxGroup;
+      layerSpears = new FlxGroup;
       layerBackground = new FlxGroup;
 
       // initialize background group; tile it 5x10
@@ -107,6 +111,7 @@ package
       this.add( layerObjects );
       this.add( player );
       this.add( player.whipSprite );
+      this.add( layerSpears );
 
       // set camera
       FlxG.camera.follow( player );
@@ -114,7 +119,7 @@ package
       FlxG.worldBounds = new FlxRect( 0, 0, level.width, level.height );
 
       // initialize hud
-      score = new FlxText( 10, 10, 50, 'Score: ' + Globals.score );
+      score = new FlxText( 10, 10, 100, 'Score: ' + Globals.score );
       score.scrollFactor.x = 0;
       score.scrollFactor.y = 0;
       add( score );
@@ -151,6 +156,9 @@ package
       // update spikes
       this.updateSpikes( );
       
+      // update spears
+      this.updateSpears( );
+      
       if ( this.shakeTimer > Globals.GAME_SHAKE_MAX_TIMER || Math.random( ) * 10000 < Globals.GAME_SHAKE_CHANCE ) {
         FlxG.shake( 0.02 );
         this.shakeTimer = 0;
@@ -160,6 +168,8 @@ package
       FlxG.collide( this.level, this.player );
       // collide player with lava
       FlxG.collide( this.lava, this.player, this.lavaCollision );
+      // collide player with spears
+      FlxG.collide( this.layerSpears, this.player, this.spearCollision );
 
       // check for win condition
       if ( this.level.getTile( this.player.x/Globals.TILE_WIDTH, this.player.y/Globals.TILE_HEIGHT ) == Globals.TILES_EXIT ) {
@@ -235,13 +245,17 @@ package
         case 20: return FlxTilemap.arrayToCSV( Levels.level20( ), 30 ); break;
         case 21: return FlxTilemap.arrayToCSV( Levels.level21( ), 20 ); break;
         
-        case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
-        case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
-        case 33: return FlxTilemap.arrayToCSV( Levels.level33( ), 6 ); break;
-        case 34: return FlxTilemap.arrayToCSV( Levels.level34( ), 50 ); break;
-        case 35: return FlxTilemap.arrayToCSV( Levels.level35( ), 30 ); break;
-        case 36: return FlxTilemap.arrayToCSV( Levels.level36( ), 50 ); break;
-        case 46: return FlxTilemap.arrayToCSV( Levels.level46( ), 27 ); break;
+        // hard levels
+        case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 15 ); break;
+        
+        // use me whereever needed
+        // case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
+        // case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
+        // case 33: return FlxTilemap.arrayToCSV( Levels.level33( ), 6 ); break;
+        // case 34: return FlxTilemap.arrayToCSV( Levels.level34( ), 50 ); break;
+        // case 35: return FlxTilemap.arrayToCSV( Levels.level35( ), 30 ); break;
+        // case 36: return FlxTilemap.arrayToCSV( Levels.level36( ), 50 ); break;
+        // case 46: return FlxTilemap.arrayToCSV( Levels.level46( ), 27 ); break;
 
         default:
           Globals.hasWhip = true;
@@ -317,8 +331,10 @@ package
     public function initializeSpikes( ):void {
       
       this.spikeAnimationTimer = new Array( this.level.widthInTiles * this.level.heightInTiles );
+      this.spearAnimationTimer = new Array( this.level.widthInTiles * this.level.heightInTiles );
       for ( var i:int = 0; i < this.level.widthInTiles * this.level.heightInTiles; i++ ) {
         this.spikeAnimationTimer[ i ] = -1;
+        this.spearAnimationTimer[ i ] = Globals.GAME_SPEAR_RESPAWN;
       }
     }
 
@@ -494,8 +510,50 @@ package
         
         
       }
+      // TODO: maybe spike removal after timeout of 1.5 seconds for the player to use strategy
+    }
+    
+    public function updateSpears( ):void {
       
-      // spike removal after timeout
+      // check if player is in horizontal line with a spear trap
+      for ( var i:int = 0; i < this.level.widthInTiles * this.level.heightInTiles; i++ ) {
+        
+        // if tile no spears spawner, continue
+        if ( this.level.getTileByIndex( i ) != 50 ) continue;
+        this.spearAnimationTimer[ i ] += FlxG.elapsed; // elapse spawn timer
+        
+        // if tile not in line with player, continue
+        if ( this.player.y - Globals.TILE_HEIGHT > ( ( i / this.level.widthInTiles ) * Globals.TILE_HEIGHT ) - (i % this.level.widthInTiles) ) continue;
+        if ( this.player.y + Globals.TILE_HEIGHT < ( ( i / this.level.widthInTiles ) * Globals.TILE_HEIGHT ) - (i % this.level.widthInTiles) ) continue;
+        
+        // else spawn new spear
+        if ( this.spearAnimationTimer[ i ] >= Globals.GAME_SPEAR_RESPAWN ) {
+          this.spawnSpear( i ); 
+        }
+      }
+    }
+    
+    // spawns a spear in the direction of the player starting given tile
+    public function spawnSpear( fromTile:int ):void {
+      
+      this.spearAnimationTimer[ fromTile ] = 0;
+      
+      // get direction to shoot
+      var spear:FlxSprite = new FlxSprite( ( fromTile % this.level.widthInTiles ) * Globals.TILE_WIDTH, ( fromTile / this.level.widthInTiles * Globals.TILE_HEIGHT ) - (fromTile % this.level.widthInTiles) );
+      spear.loadGraphic( Tiles, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
+      //spear.drag.x = 0;
+      
+      if ( spear.x < this.player.x ) { // fly right
+        spear.x += 5;
+        spear.velocity.x = Globals.GAME_SPEAR_SPEED;
+        spear.addAnimation( 'go', [ 51 ] );
+      } else { // fly left
+        spear.x -= 5;
+        spear.velocity.x = -Globals.GAME_SPEAR_SPEED;
+        spear.addAnimation( 'go', [ 50 ] );
+      }
+      spear.play( 'go' );
+      this.layerSpears.add( spear );
     }
 
     // helper functions
@@ -599,6 +657,17 @@ package
         // collision with spikes makes the player dead immediately
         Globals.health = 0; 
       }
+    }
+    
+    public function spearCollision( tile:FlxSprite, plr:Player ):void {
+      // TODO: spear collision
+      plr.flicker( 3 );
+      Globals.health--;
+      plr.paralyzed = true;
+      plr.holdingLadder = false;
+      plr.velocity.y = Globals.GAME_GRAVITY;
+      plr.acceleration.y = Globals.GAME_GRAVITY;
+      tile.kill( );
     }
     
     public function ladderCollision( tile:FlxTile, plr:Player ):void {
