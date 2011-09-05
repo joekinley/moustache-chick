@@ -225,10 +225,11 @@ package
     public function getLevel( number:int ):String {
 
       switch( number ) {
+        // debug level
         case -1: return FlxTilemap.arrayToCSV( Levels.level01( ), 8 ); break;
-        // easy levels
         case 0: return FlxTilemap.arrayToCSV( Levels.level0( ), 10 ); break;
-        case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 ); break;
+        // easy levels
+        case 1: return FlxTilemap.arrayToCSV( Levels.level1( ), 20 ); break; // introducing lava
         case 2: return FlxTilemap.arrayToCSV( Levels.level2( ), 15 ); break;
         case 3: return FlxTilemap.arrayToCSV( Levels.level3( ), 20 ); break;
         case 4: return FlxTilemap.arrayToCSV( Levels.level4( ), 30 ); break;
@@ -247,22 +248,22 @@ package
         case 16: return FlxTilemap.arrayToCSV( Levels.level16( ), 10 ); break;
         case 17: return FlxTilemap.arrayToCSV( Levels.level17( ), 30 ); break;
         case 18: return FlxTilemap.arrayToCSV( Levels.level18( ), 20 ); break;
-        case 19: return FlxTilemap.arrayToCSV( Levels.level19( ), 80 ); break;
-        case 20: return FlxTilemap.arrayToCSV( Levels.level20( ), 30 ); break;
-        case 21: return FlxTilemap.arrayToCSV( Levels.level21( ), 20 ); break; // introducing ladders
-        case 22: return FlxTilemap.arrayToCSV( Levels.level22( ), 30 ); break;
+        case 19: return FlxTilemap.arrayToCSV( Levels.level19( ), 6 ); break;
+        case 20: return FlxTilemap.arrayToCSV( Levels.level20( ), 80 ); break;
+        case 21: return FlxTilemap.arrayToCSV( Levels.level21( ), 30 ); break;
+        case 22: return FlxTilemap.arrayToCSV( Levels.level22( ), 50 ); break;
         case 23: return FlxTilemap.arrayToCSV( Levels.level23( ), 30 ); break;
-        
+        case 24: return FlxTilemap.arrayToCSV( Levels.level24( ), 20 ); break; // introducing ladders
+        case 25: return FlxTilemap.arrayToCSV( Levels.level25( ), 30 ); break;
+        case 26: return FlxTilemap.arrayToCSV( Levels.level26( ), 30 ); break;
+        case 27: return FlxTilemap.arrayToCSV( Levels.level27( ), 15 ); break;
+        case 28: return FlxTilemap.arrayToCSV( Levels.level28( ), 25 ); break;
+        case 29: return FlxTilemap.arrayToCSV( Levels.level29( ), 25 ); break;
+        case 30: return FlxTilemap.arrayToCSV( Levels.level30( ), 50 ); break;
         // hard levels
         case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 15 ); break;
         
-        // use me whereever needed
-        // case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 25 ); break;
-        // case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 25 ); break;
-        // case 33: return FlxTilemap.arrayToCSV( Levels.level33( ), 6 ); break;
-        // case 34: return FlxTilemap.arrayToCSV( Levels.level34( ), 50 ); break;
-        // case 35: return FlxTilemap.arrayToCSV( Levels.level35( ), 30 ); break;
-        // case 36: return FlxTilemap.arrayToCSV( Levels.level36( ), 50 ); break;
+        // the end 
         // case 46: return FlxTilemap.arrayToCSV( Levels.level46( ), 27 ); break;
 
         default:
@@ -585,9 +586,9 @@ package
     // mode = 2 -> only wall floor tiles
     public function isFloor( tile:int, mode:int = 0 ):Boolean {
 
-      if ( mode == 0 && ( tile == 21 || tile == 22 ) ) return true;
+      if ( mode == 0 && ( tile == 21 || tile == 22 || tile == 23 || tile == 49 ) ) return true;
       if ( mode == 1 && ( tile == 21 ) ) return true;
-      if ( mode == 2 && ( tile == 22 || tile == 23 ) ) return true;
+      if ( mode == 2 && ( tile == 22 || tile == 23 || tile == 49 ) ) return true;
       return false;
     }
     
