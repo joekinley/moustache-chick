@@ -45,6 +45,7 @@ package
 
     private var score:FlxText;
     private var health:FlxText;
+    private var levelIndicator:FlxText;
     private var isWhipping:Boolean
     private var whipTimer:Number;
     private var gameScore:int;
@@ -128,6 +129,11 @@ package
       health.scrollFactor.x = 0;
       health.scrollFactor.y = 0;
       add( health );
+      
+      levelIndicator = new FlxText( 140, 10, 100, 'Level: ' + this.gameLevel );
+      levelIndicator.scrollFactor.x = 0;
+      levelIndicator.scrollFactor.y = 0;
+      add( levelIndicator );
     }
 
     override public function update( ):void {
@@ -237,13 +243,15 @@ package
         case 13: return FlxTilemap.arrayToCSV( Levels.level13( ), 5 ); break;
         case 14: return FlxTilemap.arrayToCSV( Levels.level14( ), 60 ); break;
         // medium levels
-        case 15: return FlxTilemap.arrayToCSV( Levels.level15( ), 20 ); break;
+        case 15: return FlxTilemap.arrayToCSV( Levels.level15( ), 20 ); break; // introducding spikes
         case 16: return FlxTilemap.arrayToCSV( Levels.level16( ), 10 ); break;
         case 17: return FlxTilemap.arrayToCSV( Levels.level17( ), 30 ); break;
         case 18: return FlxTilemap.arrayToCSV( Levels.level18( ), 20 ); break;
         case 19: return FlxTilemap.arrayToCSV( Levels.level19( ), 80 ); break;
         case 20: return FlxTilemap.arrayToCSV( Levels.level20( ), 30 ); break;
-        case 21: return FlxTilemap.arrayToCSV( Levels.level21( ), 20 ); break;
+        case 21: return FlxTilemap.arrayToCSV( Levels.level21( ), 20 ); break; // introducing ladders
+        case 22: return FlxTilemap.arrayToCSV( Levels.level22( ), 30 ); break;
+        case 23: return FlxTilemap.arrayToCSV( Levels.level23( ), 30 ); break;
         
         // hard levels
         case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 15 ); break;
