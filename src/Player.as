@@ -17,6 +17,7 @@ package
     public var holdingLadder:Boolean;
     public var paralyzed:Boolean;
     private var paralyzeTimer:Number;
+    private var ladderAnimationTimer:Number;
 
     public var whipSprite:FlxSprite;
 
@@ -29,6 +30,7 @@ package
       this.Sprites = mySprites;
       loadGraphic( Sprites, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
       this.paralyzeTimer = 0;
+      this.ladderAnimationTimer = 0;
 
       // correct sprite bounds
       width = 14; // collision box tweak
@@ -50,6 +52,8 @@ package
       addAnimation( 'jump_left', [7] );
       addAnimation( 'jump_center', [8] );
       addAnimation( 'dying_blood', [43, 44, 45, 0], 10, false );
+      addAnimation( 'ladder_left', [52] );
+      addAnimation( 'ladder_right', [53] );
       
       jump = 0;
       play( 'idle' );
@@ -174,13 +178,15 @@ package
           acceleration.y = Globals.GAME_GRAVITY;
         } else if ( this.holdingLadder && FlxG.keys.UP ) {
           velocity.y = -Globals.PLAYER_SPEED;
+          this.ladderAnimationTimer += FlxG.elapsed;
         } else if ( this.holdingLadder && FlxG.keys.DOWN ) {
+          this.ladderAnimationTimer += FlxG.elapsed;
           velocity.y = Globals.PLAYER_SPEED;
         } else if ( !this.holdingLadder && FlxG.keys.DOWN ) {
           y += 32;
           this.holdingLadder = true;
           acceleration.y = 0;
-        }
+        }        
       } else {
         acceleration.y = Globals.GAME_GRAVITY;
         //jump = 0;
@@ -190,10 +196,18 @@ package
     
     public function handleAnimation( ):void {
       
-      if ( velocity.x == 0 && jump <= 0 ) {
+      if ( !this.holdingLadder && velocity.x == 0 && jump <= 0 ) {
         if ( facingDir == 'left' ) play( 'idle_left' );
         else if ( facingDir == 'right' ) play( 'idle_right' );
         else play( 'idle' );
+      } else if ( this.holdingLadder ) {
+        trace( 'jup: ' + this.ladderAnimationTimer );
+        play( 'ladder_left' );
+        if ( this.ladderAnimationTimer < 0.1 ) {
+          play( 'ladder_right' );
+        } else if ( this.ladderAnimationTimer > 0.2 ) {
+          this.ladderAnimationTimer = 0;
+        }
       }
     }
 
