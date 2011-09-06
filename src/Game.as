@@ -261,7 +261,11 @@ package
         case 29: return FlxTilemap.arrayToCSV( Levels.level29( ), 25 ); break;
         case 30: return FlxTilemap.arrayToCSV( Levels.level30( ), 50 ); break;
         // hard levels
-        case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 15 ); break;
+        case 31: return FlxTilemap.arrayToCSV( Levels.level31( ), 15 ); break; // introducing spears
+        case 32: return FlxTilemap.arrayToCSV( Levels.level32( ), 40 ); break;
+        case 33: return FlxTilemap.arrayToCSV( Levels.level33( ), 15 ); break;
+        case 34: return FlxTilemap.arrayToCSV( Levels.level34( ), 20 ); break;
+        case 35: return FlxTilemap.arrayToCSV( Levels.level35( ), 40 ); break;
         
         // the end 
         // case 46: return FlxTilemap.arrayToCSV( Levels.level46( ), 27 ); break;
@@ -532,8 +536,8 @@ package
         this.spearAnimationTimer[ i ] += FlxG.elapsed; // elapse spawn timer
         
         // if tile not in line with player, continue
-        if ( this.player.y - Globals.TILE_HEIGHT > ( ( i / this.level.widthInTiles ) * Globals.TILE_HEIGHT ) - (i % this.level.widthInTiles) ) continue;
-        if ( this.player.y + Globals.TILE_HEIGHT < ( ( i / this.level.widthInTiles ) * Globals.TILE_HEIGHT ) - (i % this.level.widthInTiles) ) continue;
+        if ( this.player.y - Globals.TILE_HEIGHT > (int)( i / this.level.widthInTiles ) * Globals.TILE_HEIGHT ) continue;
+        if ( this.player.y + Globals.TILE_HEIGHT < (int)( i / this.level.widthInTiles ) * Globals.TILE_HEIGHT ) continue;
         
         // else spawn new spear
         if ( this.spearAnimationTimer[ i ] >= Globals.GAME_SPEAR_RESPAWN ) {
@@ -544,13 +548,14 @@ package
     
     // spawns a spear in the direction of the player starting given tile
     public function spawnSpear( fromTile:int ):void {
-      
+
       this.spearAnimationTimer[ fromTile ] = 0;
       
       // get direction to shoot
-      var spear:FlxSprite = new FlxSprite( ( fromTile % this.level.widthInTiles ) * Globals.TILE_WIDTH, ( fromTile / this.level.widthInTiles * Globals.TILE_HEIGHT ) - (fromTile % this.level.widthInTiles) );
+      var spear:FlxSprite = new FlxSprite( ( fromTile % this.level.widthInTiles ) * Globals.TILE_WIDTH, (int)( fromTile / this.level.widthInTiles) * Globals.TILE_HEIGHT );
       spear.loadGraphic( Tiles, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
-      //spear.drag.x = 0;
+      spear.offset.y = 5;
+      spear.centerOffsets( );
       
       if ( spear.x < this.player.x ) { // fly right
         spear.x += 5;
@@ -586,9 +591,9 @@ package
     // mode = 2 -> only wall floor tiles
     public function isFloor( tile:int, mode:int = 0 ):Boolean {
 
-      if ( mode == 0 && ( tile == 21 || tile == 22 || tile == 23 || tile == 49 ) ) return true;
+      if ( mode == 0 && ( tile == 21 || tile == 22 || tile == 23 || tile == 49 || tile == 50 ) ) return true;
       if ( mode == 1 && ( tile == 21 ) ) return true;
-      if ( mode == 2 && ( tile == 22 || tile == 23 || tile == 49 ) ) return true;
+      if ( mode == 2 && ( tile == 22 || tile == 23 || tile == 49 || tile == 50 ) ) return true;
       return false;
     }
     
@@ -659,7 +664,7 @@ package
       // hurt collision with spikes
       if ( !this.player.dead 
        && ( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 )
-       && ( ( ( tile.mapIndex / this.level.widthInTiles * Globals.TILE_HEIGHT ) - (tile.mapIndex % this.level.widthInTiles) ) - obj.y < 5 ) ) { // tilemap collision hack on right side of player
+       && ( ( (int)( tile.mapIndex / this.level.widthInTiles) * Globals.TILE_HEIGHT ) - obj.y < 8 ) ) { // tilemap collision hack on right side of player
         FlxG.play( Globals.SoundHurt, 0.5 )
         if( Globals.health > 0 ) this.player.flicker( 3 );
         
@@ -668,15 +673,15 @@ package
       }
     }
     
-    public function spearCollision( tile:FlxSprite, plr:Player ):void {
-      // TODO: spear collision
+    public function spearCollision( spear:FlxSprite, plr:Player ):void {
+      
       plr.flicker( 3 );
       Globals.health--;
       plr.paralyzed = true;
       plr.holdingLadder = false;
       plr.velocity.y = Globals.GAME_GRAVITY;
       plr.acceleration.y = Globals.GAME_GRAVITY;
-      tile.kill( );
+      spear.kill( );
     }
     
     public function ladderCollision( tile:FlxTile, plr:Player ):void {
@@ -686,10 +691,7 @@ package
       if ( tile.index == 49 && FlxG.keys.UP && !plr.holdingLadder ) return;
       
       // no going further than fist 5 pixels on top ladder step
-      //trace( plr.y, ( ( tile.mapIndex / this.level.widthInTiles * Globals.TILE_HEIGHT ) - (tile.mapIndex % this.level.widthInTiles) ) );
-      //if( tile.index == 48 ) trace( plr.holdingLadder, ( ( tile.mapIndex / this.level.widthInTiles * Globals.TILE_HEIGHT ) - (tile.mapIndex % this.level.widthInTiles) ) - plr.y );
-       
-      if ( plr.holdingLadder && tile.index == 48 && ( ( tile.mapIndex / this.level.widthInTiles * Globals.TILE_HEIGHT ) - (tile.mapIndex % this.level.widthInTiles) ) - plr.y >= -4 ) {
+      if ( plr.holdingLadder && tile.index == 48 && ( (int)( tile.mapIndex / this.level.widthInTiles ) * Globals.TILE_HEIGHT ) - plr.y >= -4 ) {
         plr.isTouchingLadder( false, 0 );
         plr.holdingLadder = false;
       } else if( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - plr.x ) < 10 ) {
@@ -714,10 +716,17 @@ package
     // used for debug stuff
     public function debug( ):void {
 
+      var newLevel:Game;
+      
       if ( FlxG.keys.justPressed( 'P' ) ) Globals.health++;
       if ( FlxG.keys.justPressed( 'O' ) ) {
         Globals.deathCounter = 0;
-        var newLevel:Game = new Game( this.gameLevel + 1, Tiles );
+        newLevel = new Game( this.gameLevel + 1, Tiles );
+        FlxG.switchState( newLevel );
+      }
+      if ( FlxG.keys.justPressed( 'I' ) ) {
+        Globals.deathCounter = 0;
+        newLevel = new Game( this.gameLevel -1, Tiles );
         FlxG.switchState( newLevel );
       }
     }

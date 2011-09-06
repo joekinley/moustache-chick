@@ -201,7 +201,6 @@ package
         else if ( facingDir == 'right' ) play( 'idle_right' );
         else play( 'idle' );
       } else if ( this.holdingLadder ) {
-        trace( 'jup: ' + this.ladderAnimationTimer );
         play( 'ladder_left' );
         if ( this.ladderAnimationTimer < 0.1 ) {
           play( 'ladder_right' );
