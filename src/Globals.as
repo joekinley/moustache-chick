@@ -29,6 +29,7 @@ package
     public static const GAME_HIT_LAVA_LOSE_SCORE:int = 2; // lose this amount of score when hitting lavas
     public static const GAME_SPIKE_ANIMATION_SPEED:Number = 0.025; // animation speed for appearing spikes
     public static const GAME_SPIKE_DURATION:Number = 3; // duration of appeared spikes
+    public static const GAME_SPIKE_HURT:int = 5; // amount of health a spike removes
     public static const GAME_SHAKE_MAX_TIMER:Number = 15; // shake screen every x seconds
     public static const GAME_SHAKE_CHANCE:Number = 20; // permillion chance of shaking earlier
     public static const GAME_DIE_TIME:Number = 0.15; // seconds after dying before respawning

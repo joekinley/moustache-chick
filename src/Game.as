@@ -16,6 +16,7 @@ package
   import org.flixel.FlxRect;
   import org.flixel.FlxText;
   import org.flixel.FlxSprite;
+  import org.flixel.FlxCamera;
   import org.flixel.system.FlxTile;
 
   public class Game extends FlxState
@@ -51,6 +52,7 @@ package
     private var whipTimer:Number;
     private var gameScore:int;
     private var godMode:Boolean;
+    private var spikeFlickering:Boolean;
 
     public function Game( number:int, tileset:Class )
     {
@@ -64,6 +66,7 @@ package
       Globals.health = Globals.PLAYER_START_HEALTH;
       this.gameScore = 0;
       this.godMode = false;
+      this.spikeFlickering = false;
       
       // initialize layers
       layerWorld = new FlxGroup;
@@ -118,7 +121,7 @@ package
       this.add( layerSpears );
 
       // set camera
-      FlxG.camera.follow( player );
+      FlxG.camera.follow( player, FlxCamera.STYLE_PLATFORMER );
       FlxG.camera.setBounds( 0, 0, level.width, level.height );
       FlxG.worldBounds = new FlxRect( 0, 0, level.width, level.height );
 
@@ -144,6 +147,8 @@ package
 
     override public function update( ):void {
 
+      if ( !this.player.flickering ) this.spikeFlickering = false;
+      
       this.debug( );
 
       this.lavaTimer += FlxG.elapsed;
@@ -600,7 +605,7 @@ package
     
     // boss level handler
     public function handleBossLevel( ):void {
-      
+       // TODO: needed anymore?
     }
 
     // helper functions
@@ -700,14 +705,15 @@ package
       
       // hurt handling
       // hurt collision with spikes
-      if ( !this.player.dead 
+      if ( !this.player.dead && !this.spikeFlickering
        && ( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 )
        && ( ( (int)( tile.mapIndex / this.level.widthInTiles) * Globals.TILE_HEIGHT ) - obj.y < 8 ) ) { // tilemap collision hack on right side of player
         FlxG.play( Globals.SoundHurt, 0.5 )
-        if( Globals.health > 0 ) this.player.flicker( 3 );
+        if ( Globals.health > 0 ) this.player.flicker( 3 );
+        this.spikeFlickering = true;
         
-        // collision with spikes makes the player dead immediately
-        Globals.health = 0; 
+        // collision with spikes makes the player dead nearly immediately
+        Globals.health -= Globals.GAME_SPIKE_HURT; 
       }
     }
     
