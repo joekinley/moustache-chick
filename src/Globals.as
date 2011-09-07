@@ -42,6 +42,9 @@ package
     public static const PLAYER_JUMP_MIN:Number = 0.0625; // 0.0625
     public static const PLAYER_START_HEALTH:int =  1; // player starts with this amount of health
     public static const PLAYER_WHIP_DURATION:Number = 1; // seconds the whip is on
+    public static const BOSS_SPEED:int = 150; // speed of the end boss
+    public static const BOSS_LAVA_SPAWN:Number = 0.7; // speed at which lava raises in boss level
+    public static const BOSS_SPEAR_SPAWN:Number = 3.2; // speed at which spears will be spawned
 
     // special tiles
     public static const TILES_EMPTY:int = 1;

@@ -32,6 +32,7 @@ package
     private var game:Game;
     private var player:Player;
     private var gameLevel:int;
+    private var boss:Boss;
 
     private var lavaTimer:Number;
     private var lavaNewTimer:Number;
@@ -49,6 +50,7 @@ package
     private var isWhipping:Boolean
     private var whipTimer:Number;
     private var gameScore:int;
+    private var godMode:Boolean;
 
     public function Game( number:int, tileset:Class )
     {
@@ -61,6 +63,7 @@ package
 
       Globals.health = Globals.PLAYER_START_HEALTH;
       this.gameScore = 0;
+      this.godMode = false;
       
       // initialize layers
       layerWorld = new FlxGroup;
@@ -69,7 +72,7 @@ package
       layerBackground = new FlxGroup;
 
       // initialize background group; tile it 5x10
-      for ( var i:int = 0; i < 6; i++ ) {
+      for ( var i:int = 0; i < 11; i++ ) {
         for ( var j:int = 0; j < 10; j++ ) {
           var oneTile:FlxSprite = new FlxSprite( j * 160, i * 160, Globals.Background );
           this.layerBackground.add( oneTile );
@@ -134,6 +137,9 @@ package
       levelIndicator.scrollFactor.x = 0;
       levelIndicator.scrollFactor.y = 0;
       add( levelIndicator );
+      
+      // special boss level handler
+      if( this.gameLevel == 45 ) initializeBossLevel( );
     }
 
     override public function update( ):void {
@@ -215,6 +221,9 @@ package
           FlxG.switchState( thisLevel );
         }
       }
+      
+      // special boss level handler
+      if( this.gameLevel == 45 ) handleBossLevel( );
 
       // no negative score
       if ( Globals.score <= 0 ) Globals.score = 0;
@@ -267,6 +276,7 @@ package
         case 34: return FlxTilemap.arrayToCSV( Levels.level34( ), 20 ); break;
         case 35: return FlxTilemap.arrayToCSV( Levels.level35( ), 40 ); break;
         
+        case 45:return FlxTilemap.arrayToCSV( Levels.level45( ), 20 ); break; // BOSS level
         // the end 
         // case 46: return FlxTilemap.arrayToCSV( Levels.level46( ), 27 ); break;
 
@@ -569,6 +579,29 @@ package
       spear.play( 'go' );
       this.layerSpears.add( spear );
     }
+    
+    // initializing boss level
+    public  function initializeBossLevel( ):void {
+      for ( var i:int = 0; i < this.level.widthInTiles * this.level.heightInTiles; i++ ) {
+        // place boss sprite
+        if ( this.level.getTileByIndex( i ) == 3 ) {
+          this.level.setTileByIndex( i, 0 );
+          this.boss = new Boss( Tiles );
+
+          this.boss.x = ( i % this.level.widthInTiles ) * Globals.TILE_WIDTH;
+          this.boss.y = (int)( i / this.level.widthInTiles ) * Globals.TILE_HEIGHT;
+          this.boss.setAssets( this.level, this.lava, this.player, this.spawnSpear );
+          
+          this.add( this.boss );
+          break;
+        }
+      }
+    }
+    
+    // boss level handler
+    public function handleBossLevel( ):void {
+      
+    }
 
     // helper functions
     // mode = 0 -> all lava
@@ -626,6 +659,8 @@ package
 
     public function lavaCollision( tile:FlxTile, obj:FlxObject ):void {
 
+      if ( this.godMode ) return;
+      
       // hurt collision with lava
       if( !this.player.dead && !this.player.flickering && Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 ) { // tilemap collision hack on right side of player
         FlxG.play( Globals.SoundHurt, 0.5 )
@@ -660,6 +695,9 @@ package
         this.level.setTileByIndex( tile.mapIndex, 41 );
         this.spikeAnimationTimer[ tile.mapIndex ] = 0;
       }
+      
+      if ( this.godMode ) return;
+      
       // hurt handling
       // hurt collision with spikes
       if ( !this.player.dead 
@@ -674,6 +712,8 @@ package
     }
     
     public function spearCollision( spear:FlxSprite, plr:Player ):void {
+      
+      if ( this.godMode ) return;
       
       plr.flicker( 3 );
       Globals.health--;
@@ -718,6 +758,10 @@ package
 
       var newLevel:Game;
       
+      if ( FlxG.keys.justPressed( 'U' ) ) {
+        this.godMode = !this.godMode;
+        trace( this.godMode );
+      }
       if ( FlxG.keys.justPressed( 'P' ) ) Globals.health++;
       if ( FlxG.keys.justPressed( 'O' ) ) {
         Globals.deathCounter = 0;
