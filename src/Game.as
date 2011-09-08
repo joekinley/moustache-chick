@@ -281,6 +281,8 @@ package
         case 34: return FlxTilemap.arrayToCSV( Levels.level34( ), 20 ); break;
         case 35: return FlxTilemap.arrayToCSV( Levels.level35( ), 40 ); break;
         
+        case 43: return FlxTilemap.arrayToCSV( Levels.level43( ), 9 ); break;
+        
         case 45:return FlxTilemap.arrayToCSV( Levels.level45( ), 20 ); break; // BOSS level
         // the end 
         // case 46: return FlxTilemap.arrayToCSV( Levels.level46( ), 27 ); break;

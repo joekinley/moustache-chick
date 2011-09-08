@@ -133,13 +133,14 @@ package
     }
     
     public function handleJump( ):void {
-      
-      // play jump sound
-      if( FlxG.keys.justPressed( 'UP' ) ) FlxG.play( Globals.SoundJump, 0.5 );
 
       // mario style jump mechanic
-      if( !this.holdingLadder ) {
-        if ( FlxG.keys.UP && jump >= 0 ) {
+      if ( !this.holdingLadder ) {
+        
+        // play jump sound
+        if( FlxG.keys.justPressed( 'UP' ) || FlxG.keys.justPressed( 'X' ) ) FlxG.play( Globals.SoundJump, 0.5 );
+        
+        if ( FlxG.keys.UP || FlxG.keys.X && jump >= 0 ) {
           jump += FlxG.elapsed;
           if ( jump > Globals.PLAYER_JUMP_MAX ) jump = -1;
 

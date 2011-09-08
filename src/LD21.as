@@ -12,7 +12,7 @@ package
 	{
 		public function LD21():void
 		{
-			super(320, 240, MenuState, 2);
+			super(320, 240, Intro, 2);
       addEventListener(Event.ADDED_TO_STAGE, init);
 		}
     

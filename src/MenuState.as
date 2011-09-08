@@ -19,7 +19,7 @@ package
 
       var text:FlxText = new FlxText( 90, 120, 200, 'Cursor keys for movement' );
       add( text );
-      var text2:FlxText = new FlxText( 90, 150, 190, '[a] for whip, after Level "The End" for breaking floors' );
+      var text2:FlxText = new FlxText( 90, 130, 200, '[A] or [UP] for jump' );
       add( text2 );
 		}
     
