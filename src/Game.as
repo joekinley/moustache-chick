@@ -285,10 +285,11 @@ package
         case 38: return FlxTilemap.arrayToCSV( Levels.level38( ), 25 ); break;
         case 39: return FlxTilemap.arrayToCSV( Levels.level39( ), 20 ); break;
         case 40: return FlxTilemap.arrayToCSV( Levels.level40( ), 40 ); break;
-        
-        case 43: return FlxTilemap.arrayToCSV( Levels.level43( ), 9 ); break;
-        
-        case 45:return FlxTilemap.arrayToCSV( Levels.level45( ), 20 ); break; // BOSS level
+        case 41: return FlxTilemap.arrayToCSV( Levels.level41( ), 25 ); break;
+        case 42: return FlxTilemap.arrayToCSV( Levels.level42( ), 9 ); break;
+        case 43: return FlxTilemap.arrayToCSV( Levels.level43( ), 20 ); break;
+        case 44: return FlxTilemap.arrayToCSV( Levels.level44( ), 15 ); break;
+        case 45: return FlxTilemap.arrayToCSV( Levels.level45( ), 20 ); break; // BOSS level
         // the end 
         // case 46: return FlxTilemap.arrayToCSV( Levels.level46( ), 27 ); break;
 
