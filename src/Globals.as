@@ -68,7 +68,7 @@ package
     public static var hasWhip:Boolean = false;
 
     [Embed(source = '../assets/graphics/background.png')] public static const Background:Class;
-    [Embed(source = '../assets/graphics/menuback.png')] public static const MenuBackground:Class;
+    [Embed(source = '../assets/graphics/title.png')] public static const MenuBackground:Class;
     [Embed(source = '../assets/sound/jump.mp3')] public static const SoundJump:Class;
     [Embed(source = '../assets/sound/hurt.mp3')] public static const SoundHurt:Class;
     [Embed(source = '../assets/sound/coin.mp3')] public static const SoundCoin:Class;

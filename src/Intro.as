@@ -32,9 +32,11 @@ package
       add ( text );
       
       // keys text
-      var keysText:FlxText = new FlxText( 5, 5, 200, 'Press [ESCAPE] to skip' );
+      var keysText:FlxText = new FlxText( 5, 5, 200, '[ESCAPE] to skip' );
+      keysText.scale = new FlxPoint( 1, 1 );
       add( keysText );
-      var keysText2:FlxText = new FlxText( 5, 15, 200, 'Press [X] for next panel' );
+      var keysText2:FlxText = new FlxText( 5, 15, 200, '[X] for next panel' );
+      keysText2.scale = new FlxPoint( 1, 1 );
       add( keysText2 );
       
       currentScreen = new FlxSprite
@@ -57,6 +59,7 @@ package
       currentScreen.addAnimation( '13', [12] );
       currentScreen.addAnimation( '14', [13] );
       currentScreen.addAnimation( '15', [14] );
+      currentScreen.addAnimation( '16', [15] );
       currentScreen.scale = new FlxPoint( 3, 3 );
       
       add( currentScreen );
@@ -78,7 +81,7 @@ package
       }
       
       // quit properly
-      if ( current > 15 ) {
+      if ( current > 16 ) {
         quitIntro( );
       }
     }
@@ -115,7 +118,8 @@ package
         case 12: output = "NO! NEVER!"; break;
         case 13: output = "Come here and give it to me!"; break;
         case 14: output = "NO, CATCH ME IF YOU CAN"; break;
-        case 15: output = "... and so begins Moustache Chick's adventure..."; break;
+        case 15: output = "YOU WILL NEVER GET TO ME"; break;
+        case 16: output = "... and so begins the adventure of ..."; break;
         default: output = ""; break;
       }
       
