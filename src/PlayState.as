@@ -16,7 +16,7 @@ package
       Globals.health = Globals.PLAYER_START_HEALTH;
       Globals.score = 0;
 
-      var game:Game = new Game( 1, Tiles );
+      var game:Game = new Game( 40, Tiles );
       FlxG.switchState( game );
     }
 

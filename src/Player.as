@@ -140,7 +140,7 @@ package
         // play jump sound
         if( FlxG.keys.justPressed( 'UP' ) || FlxG.keys.justPressed( 'X' ) ) FlxG.play( Globals.SoundJump, 0.5 );
         
-        if ( FlxG.keys.UP || FlxG.keys.X && jump >= 0 ) {
+        if ( ( FlxG.keys.UP || FlxG.keys.X ) && jump >= 0 ) {
           jump += FlxG.elapsed;
           if ( jump > Globals.PLAYER_JUMP_MAX ) jump = -1;
 
