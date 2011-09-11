@@ -5,6 +5,7 @@ package
    * @author Rafael Wenzel
    */
   import flash.display.Sprite;
+  import org.flixel.FlxSave;
   import org.flixel.FlxTileblock;
   import org.flixel.FlxTilemap;
   import org.flixel.FlxState;
@@ -62,6 +63,7 @@ package
     }
 
     override public function create( ):void {
+      this.saveProgress( );
 
       Globals.health = Globals.PLAYER_START_HEALTH;
       this.gameScore = 0;
@@ -149,7 +151,7 @@ package
 
       if ( !this.player.flickering ) this.spikeFlickering = false;
       
-      this.debug( );
+      //this.debug( );
 
       this.lavaTimer += FlxG.elapsed;
       this.lavaNewTimer += FlxG.elapsed;
@@ -765,6 +767,13 @@ package
           }
         }
       }
+    }
+    
+    public function saveProgress( ):void {
+      var save:FlxSave = new FlxSave( );
+      save.bind( Globals.GAME_SAVE_NAME );
+      
+      save.data.progress = this.gameLevel;
     }
 
     // used for debug stuff

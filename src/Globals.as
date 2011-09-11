@@ -36,6 +36,7 @@ package
     public static const GAME_SPEAR_SPEED:int = 300; // speed of a spear
     public static const GAME_SPEAR_RESPAWN:Number = 2.5; // seconds until another spear fires
     public static const GAME_SPEAR_HIT_TIMEOUT:Number = 2; // seconds the player is paralyzed after being hit by speer
+    public static const GAME_SAVE_NAME:String = "Moustache_Chick"; // name for save object to save progress
     public static const PLAYER_SPEED:int = 125; // 150 (120 for slower but still okay)
     public static const PLAYER_SPEED_JUMP:int = 180; // 150 jump speed is faster
     public static const PLAYER_JUMP:int = 700; // 800
@@ -66,7 +67,9 @@ package
     public static var score:int = 0;
     public static var health:int = 0;
     public static var hasWhip:Boolean = false;
+    public static var progress:int = 1; // progress of player, will be saved
 
+    [Embed(source = '../assets/graphics/tiles_2.png')] public static const Tiles:Class;
     [Embed(source = '../assets/graphics/background.png')] public static const Background:Class;
     [Embed(source = '../assets/graphics/title.png')] public static const MenuBackground:Class;
     [Embed(source = '../assets/sound/jump.mp3')] public static const SoundJump:Class;

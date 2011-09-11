@@ -157,11 +157,11 @@ package
     public function handlePlayerDeath( ):void {
       
       if ( this.lavaLevel < 3 ) return;
-      if ( (int)(this.level.heightInTiles * Globals.TILE_HEIGHT - this.lavaLevel * Globals.TILE_HEIGHT -5 ) < (int)(this.player.y) ) Globals.health = 0;
+      if ( (int)(this.level.heightInTiles * Globals.TILE_HEIGHT - this.lavaLevel * Globals.TILE_HEIGHT )-5 < (int)(this.player.y) ) Globals.health = 0;
     }
     
     public function handleBossDeath( ):void {
-      if ( !this.dead && (int)(this.level.heightInTiles * Globals.TILE_HEIGHT - (this.lavaLevel) * Globals.TILE_HEIGHT - 5) < (int)(this.y) ) {
+      if ( !this.dead && (int)(this.level.heightInTiles * Globals.TILE_HEIGHT - (this.lavaLevel) * Globals.TILE_HEIGHT )-5 < (int)(this.y) ) {
         this.play( 'dying' );
         this.dead = true;
       }
