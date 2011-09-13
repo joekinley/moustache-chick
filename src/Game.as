@@ -154,7 +154,7 @@ package
 
       if ( !this.player.flickering ) this.spikeFlickering = false;
       
-      this.debug( );
+      //this.debug( );
 
       this.lavaTimer += FlxG.elapsed;
       this.lavaNewTimer += FlxG.elapsed;
