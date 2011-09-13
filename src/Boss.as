@@ -2,6 +2,7 @@ package
 {
   import org.flixel.FlxPath;
   import org.flixel.FlxSprite;
+  import org.flixel.FlxText;
   import org.flixel.FlxTilemap;
   import org.flixel.FlxG;
 	
@@ -25,8 +26,14 @@ package
     private var gotoY:int;
     private var dead:Boolean;
     
+    private var bossMessage:FlxText;
+    
     public function Boss( mySprites:Class ) 
     {
+      bossMessage = new FlxText( 100, 150, 200, '' );
+      bossMessage.scrollFactor.x = 0;
+      bossMessage.scrollFactor.y = 0;
+         
       this.Sprites = mySprites;
       loadGraphic( Sprites, true, false, Globals.TILE_WIDTH, Globals.TILE_HEIGHT );
       facingDir = 'left';
@@ -79,7 +86,13 @@ package
       this.handlePlayerDeath( );
       this.handleBossDeath( );
       
+      this.handleMessages( );
+      
       super.update( );
+    }
+    
+    public function getBossMessage( ):FlxText {
+      return bossMessage;
     }
     
     public function setAssets( myLevel:FlxTilemap, myLava:FlxTilemap, myPlayer:Player, myFunc:Function ):void {
@@ -93,6 +106,7 @@ package
     public function spawnSpear( ):void {
       
       if ( this.player.y + Globals.TILE_HEIGHT >= this.y && this.player.y - 2 * Globals.TILE_HEIGHT <= this.y ) {
+        FlxG.play( Globals.SoundBoss, 0.5 )
         this.spawnSpearFunc( ( this.x / Globals.TILE_WIDTH ) + (int)( this.y / Globals.TILE_HEIGHT ) * this.level.widthInTiles );
       }
     }
@@ -165,6 +179,42 @@ package
         this.play( 'dying' );
         this.dead = true;
       }
+    }
+    
+    public function handleMessages( ):void {
+      // reset text
+      this.bossMessage.text = "";
+      
+      // standard text
+      if ( levelTimer > 0.5 && levelTimer < 3.5 ) {
+        this.bossMessage.text = "Haha, so you finally found me";
+      } else if ( levelTimer > 5 && levelTimer < 8 ) {
+        this.bossMessage.text = "You will never get out of here";
+      } else if ( levelTimer > 12 && levelTimer < 15 ) {
+        this.bossMessage.text = "I am too powerfull for you";
+      } else if ( levelTimer > 20 && levelTimer < 23 ) {
+        this.bossMessage.text = "This will be your graveyard";
+      } else if ( levelTimer > 25 && levelTimer < 28 ) {
+        this.bossMessage.text = "You can give up right now";
+      } else if ( levelTimer > 30 && levelTimer < 33 ) {
+        this.bossMessage.text = "You fool";
+      } else if ( levelTimer > 38 && levelTimer < 41 ) {
+        this.bossMessage.text = "By the way, your moustache is gross";
+      }
+      
+      // event text
+      if ( this.player.y + Globals.TILE_HEIGHT < this.y ) {
+        this.bossMessage.text = "Wait, what happens here?";
+        this.raiseLava( );
+      }
+      
+      if ( this.dead ) {
+        this.bossMessage.text = "Noooooooooooooo";
+      }
+    }
+    
+    public function isDead( ):Boolean {
+      return dead;
     }
     
   }

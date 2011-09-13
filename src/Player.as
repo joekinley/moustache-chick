@@ -234,6 +234,7 @@ package
         this._flickerTimer = 0;
         this.dead = true;
         play( 'dying_blood' );
+        FlxG.play( Globals.SoundDying, 0.5 )
       }
     }
   }

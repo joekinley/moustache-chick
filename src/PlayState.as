@@ -22,9 +22,9 @@ package
       Globals.health = Globals.PLAYER_START_HEALTH;
       Globals.score = 0;
 
-      var game:Game = new Game( Globals.progress, Globals.Tiles );
-      FlxG.switchState( game );
-      // FlxG.switchState( new LevelSelect );
+      //var game:Game = new Game( Globals.progress, Globals.Tiles );
+      //FlxG.switchState( game );
+      FlxG.switchState( new LevelSelect );
     }
 
     override public function destroy( ):void {

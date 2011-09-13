@@ -76,6 +76,11 @@ package
     [Embed(source = '../assets/sound/hurt.mp3')] public static const SoundHurt:Class;
     [Embed(source = '../assets/sound/coin.mp3')] public static const SoundCoin:Class;
     [Embed(source = '../assets/sound/crush.mp3')] public static const SoundCrush:Class;
+    [Embed(source = '../assets/sound/boss.mp3')] public static const SoundBoss:Class;
+    [Embed(source = '../assets/sound/dying.mp3')] public static const SoundDying:Class;
+    [Embed(source = '../assets/sound/rumble.mp3')] public static const SoundRumble:Class;
+    [Embed(source = '../assets/sound/spear.mp3')] public static const SoundSpear:Class;
+    [Embed(source = '../assets/sound/spike.mp3')] public static const SoundSpike:Class;
 
   }
 

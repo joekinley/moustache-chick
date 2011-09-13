@@ -30,6 +30,7 @@ package
     private var layerObjects:FlxGroup;
     private var layerSpears:FlxGroup;
     private var layerBackground:FlxGroup;
+    private var layerHUD:FlxGroup;
 
     private var game:Game;
     private var player:Player;
@@ -43,6 +44,7 @@ package
     private var spearAnimationTimer:Array;
     private var shakeTimer:Number;
     private var dieTimer:Number;
+    private var bossDeathTimer:Number;
 
     private var collectibleAnimationTimer:Number;
 
@@ -100,6 +102,7 @@ package
       this.collectibleAnimationTimer = 0;
       this.shakeTimer = 0;
       this.dieTimer = 0;
+      this.bossDeathTimer = 0;
 
       // initialize player
       var startPoint:FlxPoint = level.getTileCoords( Globals.TILES_PLAYER_START, false )[ 0 ];
@@ -151,7 +154,7 @@ package
 
       if ( !this.player.flickering ) this.spikeFlickering = false;
       
-      //this.debug( );
+      this.debug( );
 
       this.lavaTimer += FlxG.elapsed;
       this.lavaNewTimer += FlxG.elapsed;
@@ -159,6 +162,9 @@ package
       this.collectibleAnimationTimer += FlxG.elapsed;
       this.whipTimer += FlxG.elapsed;
       this.shakeTimer += FlxG.elapsed;
+      if ( boss.isDead( ) ) {
+        this.bossDeathTimer += FlxG.elapsed;
+      }
 
       // lava updating mechanism
       if( this.lavaNewTimer > Globals.GAME_LAVA_SPEED ) {
@@ -179,6 +185,7 @@ package
       this.updateSpears( );
       
       if ( this.shakeTimer > Globals.GAME_SHAKE_MAX_TIMER || Math.random( ) * 10000 < Globals.GAME_SHAKE_CHANCE ) {
+        FlxG.play( Globals.SoundRumble, 0.5 )
         FlxG.shake( 0.02 );
         this.shakeTimer = 0;
       }
@@ -227,6 +234,11 @@ package
           var thisLevel:Game = new Game( this.gameLevel, Tiles );
           FlxG.switchState( thisLevel );
         }
+      }
+      
+      // final game condition
+      if ( this.gameLevel == 45 && this.boss.isDead( ) && this.bossDeathTimer > 5 ) {
+        FlxG.switchState( new Outro );
       }
       
       // special boss level handler
@@ -593,6 +605,7 @@ package
       }
       spear.play( 'go' );
       this.layerSpears.add( spear );
+      FlxG.play( Globals.SoundSpear, 0.5 )
     }
     
     // initializing boss level
@@ -607,7 +620,8 @@ package
           this.boss.y = (int)( i / this.level.widthInTiles ) * Globals.TILE_HEIGHT;
           this.boss.setAssets( this.level, this.lava, this.player, this.spawnSpear );
           
-          this.add( this.boss );
+          this.add( this.boss ); // add boss himself
+          this.add( this.boss.getBossMessage( ) ); // add bossmessage
           break;
         }
       }
@@ -678,12 +692,15 @@ package
       
       // hurt collision with lava
       if( !this.player.dead && !this.player.flickering && Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 ) { // tilemap collision hack on right side of player
-        FlxG.play( Globals.SoundHurt, 0.5 )
-        if( Globals.health > 0 ) this.player.flicker( 3 );
         
         // collision with spikes makes the player dead immediately
         Globals.health--; // lava just takes health
         Globals.score -= Globals.GAME_HIT_LAVA_LOSE_SCORE;
+        
+        if ( Globals.health > 0 ) {
+          this.player.flicker( 3 );
+          FlxG.play( Globals.SoundHurt, 0.5 );
+        }
       }
     }
 
@@ -706,7 +723,7 @@ package
       
       // add new spike timer
       if( tile.index == 40 ) { 
-        
+        FlxG.play( Globals.SoundSpike, 0.5 )
         this.level.setTileByIndex( tile.mapIndex, 41 );
         this.spikeAnimationTimer[ tile.mapIndex ] = 0;
       }
@@ -718,12 +735,15 @@ package
       if ( !this.player.dead && !this.spikeFlickering
        && ( Math.abs( ( tile.mapIndex % this.lava.widthInTiles ) * Globals.TILE_WIDTH - obj.x ) < 10 )
        && ( ( (int)( tile.mapIndex / this.level.widthInTiles) * Globals.TILE_HEIGHT ) - obj.y < 8 ) ) { // tilemap collision hack on right side of player
-        FlxG.play( Globals.SoundHurt, 0.5 )
-        if ( Globals.health > 0 ) this.player.flicker( 3 );
-        this.spikeFlickering = true;
-        
+                
         // collision with spikes makes the player dead nearly immediately
         Globals.health -= Globals.GAME_SPIKE_HURT; 
+        
+        if ( Globals.health > 0 ) {
+          this.player.flicker( 3 );
+          FlxG.play( Globals.SoundHurt, 0.5 );
+        }
+        this.spikeFlickering = true;
       }
     }
     
@@ -732,7 +752,10 @@ package
       if ( this.godMode ) return;
       
       plr.flicker( 3 );
-      Globals.health--;
+      if( Globals.health > 0 ) {
+        Globals.health--;
+        FlxG.play( Globals.SoundHurt, 0.5 );
+      }
       plr.paralyzed = true;
       plr.holdingLadder = false;
       plr.velocity.y = Globals.GAME_GRAVITY;
@@ -773,7 +796,11 @@ package
       var save:FlxSave = new FlxSave( );
       save.bind( Globals.GAME_SAVE_NAME );
       
-      save.data.progress = this.gameLevel;
+      if ( save.data.progress == null ) save.data.progress = 1;
+      
+      if( save.data.progress < this.gameLevel ) {
+        save.data.progress = this.gameLevel;
+      } 
     }
 
     // used for debug stuff
