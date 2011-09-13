@@ -17,7 +17,7 @@ package
 		}
     
     private function init( e:Event ):void {
-      //MochiServices.connect( "a37cee9a5ae400e2", this.parent );
+      MochiServices.connect( "a37cee9a5ae400e2", this.parent );
     }
 	}
 

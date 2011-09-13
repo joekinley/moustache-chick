@@ -5,6 +5,9 @@ package
   import org.flixel.FlxState;
   import org.flixel.FlxG;
   import org.flixel.FlxText;
+  import mochi.as3.MochiScores;
+  import flash.ui.Mouse;
+  
 	/**
    * ...
    * @author ...
@@ -23,6 +26,13 @@ package
     }
     
     override public function create( ):void {
+      
+      if ( Globals.score > 0 ) {
+        Mouse.show( );
+        var o:Object = { n: [3, 12, 14, 11, 14, 10, 9, 4, 1, 13, 2, 12, 6, 3, 13, 14], f: function (i:Number,s:String):String { if (s.length == 16) return s; return this.f(i+1,s + this.n[i].toString(16));}};
+        var boardID:String = o.f(0,"");
+        MochiScores.showLeaderboard({boardID: boardID, score: Globals.score});
+      }
       
       animationTimer = 0;
       current = 0;
